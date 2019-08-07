@@ -1,12 +1,15 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
+import Cvc4 exposing (..)
 import Html exposing (Html, br, button, div, option, select, text, textarea)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode exposing (Decoder, field, string)
 import Json.Encode
+import Util exposing (..)
+import Z3 exposing (..)
 
 
 main =
@@ -16,34 +19,6 @@ main =
         , subscriptions = subscriptions
         , view = view
         }
-
-
-
--- UTIL
-
-
-undefined : () -> a
-undefined _ =
-    Debug.todo "<undefined>"
-
-
-toString : Http.Error -> String
-toString err =
-    case err of
-        Http.Timeout ->
-            "Timeout"
-
-        Http.NetworkError ->
-            "Network error"
-
-        Http.BadStatus resp ->
-            "BadStatus " ++ String.fromInt resp
-
-        Http.BadUrl url ->
-            "BadUrl: " ++ url
-
-        Http.BadBody body ->
-            "BadBody: " ++ body
 
 
 stringfyOutput : Maybe String -> String
@@ -60,9 +35,13 @@ stringfyOutput x =
 -- MODEL
 
 
+type Params
+    = Z3 Z3.Params
+    | Cvc4 Cvc4.Params
+
+
 type alias Model =
-    { solver : String
-    , format : String
+    { params : Params
     , input : String
     , output : Maybe String
     }
@@ -70,7 +49,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model "" "" "" Nothing, Cmd.none )
+    ( Model (Z3 Z3.default) "" Nothing, Cmd.none )
 
 
 
@@ -79,7 +58,8 @@ init _ =
 
 type Msg
     = Solver String
-    | Format String
+    | Z3Msg Z3.Msg
+    | Cvc4Msg Cvc4.Msg
     | Input String
     | Verify
     | GotResult (Result Http.Error String)
@@ -89,10 +69,31 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Solver solver ->
-            ( { model | solver = solver }, Cmd.none )
+            case solver of
+                "z3" ->
+                    ( { model | params = Z3 Z3.default }, Cmd.none )
 
-        Format format ->
-            ( { model | format = format }, Cmd.none )
+                "cvc4" ->
+                    ( { model | params = Cvc4 Cvc4.default }, Cmd.none )
+
+                _ ->
+                    undefined ()
+
+        Z3Msg z3msg ->
+            case model.params of
+                Z3 z3params ->
+                    ( { model | params = Z3 <| Z3.update z3msg z3params }, Cmd.none )
+
+                Cvc4 _ ->
+                    undefined ()
+
+        Cvc4Msg cvc4msg ->
+            case model.params of
+                Cvc4 cvc4params ->
+                    ( { model | params = Cvc4 <| Cvc4.update cvc4msg cvc4params }, Cmd.none )
+
+                Z3 _ ->
+                    undefined ()
 
         Input src ->
             ( { model | input = src }, Cmd.none )
@@ -103,10 +104,10 @@ update msg model =
         GotResult result ->
             case result of
                 Ok json ->
-                    ( { model | output = Just <| Debug.log "success response: " json }, Cmd.none )
+                    ( { model | output = Just json }, Cmd.none )
 
                 Err err ->
-                    ( { model | output = Just <| Debug.log "error response: " <| toString err }, Cmd.none )
+                    ( { model | output = Just <| toString err }, Cmd.none )
 
 
 
@@ -117,7 +118,16 @@ createVerificationRequestBody : Model -> Http.Body
 createVerificationRequestBody model =
     Http.jsonBody <|
         Json.Encode.object
-            [ ( "smt_source", Json.Encode.string model.input ) ]
+            [ ( "src", Json.Encode.string model.input )
+            , ( "argments"
+              , case model.params of
+                    Z3 z3params ->
+                        Z3.createJson z3params
+
+                    Cvc4 cvc4params ->
+                        Cvc4.createJson cvc4params
+              )
+            ]
 
 
 getVerificationResult : Model -> Cmd Msg
@@ -150,11 +160,11 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ select [ onInput Solver ]
-            [ option [ value "Z3" ] [ text "z3" ]
+        [ select [ onChange Solver ]
+            [ option [ value "z3" ] [ text "z3" ]
+            , option [ value "cvc4" ] [ text "cvc4" ]
             ]
-        , select [ onInput Format ]
-            [ option [ value "Smtlib2" ] [ text "smtlib 2.6" ] ]
+        , createParamsUi model.params
         , br [] []
         , textarea [ cols 40, rows 10, placeholder "...", onInput Input ] []
         , br [] []
@@ -162,3 +172,13 @@ view model =
         , br [] []
         , textarea [ cols 40, rows 10, placeholder "output" ] [ text <| stringfyOutput model.output ]
         ]
+
+
+createParamsUi : Params -> Html Msg
+createParamsUi params =
+    case params of
+        Z3 z3params ->
+            Html.map (\msg -> Z3Msg msg) <| Z3.createUi z3params
+
+        Cvc4 cvc4params ->
+            Html.map (\msg -> Cvc4Msg msg) <| Cvc4.createUi cvc4params

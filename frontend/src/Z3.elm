@@ -18,6 +18,32 @@ type Format
     | Z3log
 
 
+jsonOfFormat : Format -> Json.Encode.Value
+jsonOfFormat format =
+    Json.Encode.string <|
+        case format of
+            Smtlib2 ->
+                "smtlib2"
+
+            Datalog ->
+                "datalog"
+
+            Dimacs ->
+                "DIMACS"
+
+            WeightedCnfDimacs ->
+                "Weighted CNF DIMACS"
+
+            PbOptimization ->
+                "PB optimization"
+
+            CplexLp ->
+                "CPLEX LP"
+
+            Z3log ->
+                "Z3 log"
+
+
 type alias Display =
     { globalParams : Bool
     , globalParamDescs : Bool
@@ -147,7 +173,19 @@ createJson params =
     Json.Encode.object
         [ ( "z3"
           , Json.Encode.object
-                []
+                [ ( "format", jsonOfFormat params.format )
+                , ( "display"
+                  , Json.Encode.object
+                        [ ( "global_parameters", Json.Encode.bool params.display.globalParams )
+                        , ( "global_parameter_descriptions", Json.Encode.bool params.display.globalParamDescs )
+                        , ( "statistics", Json.Encode.bool params.display.statistics )
+                        , ( "warnings", Json.Encode.bool params.display.warnings )
+                        ]
+                  )
+                , ( "limit", Json.Encode.object [] )
+                , ( "global_parameters", Json.Encode.object [] )
+                , ( "module_parameters", Json.Encode.object [] )
+                ]
           )
         ]
 
@@ -164,14 +202,12 @@ formatOfString str =
 
 createUi : Params -> Html Msg
 createUi params =
-    div []
-        [ select [ onInput formatOfString ]
-            [ option [ value "smtlib2" ] [ text "smtlib2" ]
-            ]
-        , input [ type_ "checkbox", onClick DisplayGlobalParams ] [ text "display global parameters" ]
-        , input [ type_ "checkbox", onClick DisplayGlobalParamDescs ] [ text "display global parameter descriptions" ]
-        , input [ type_ "checkbox", onClick DisplayStatistics ] [ text "display statistics" ]
-        , input [ type_ "checkbox", onClick DisplayWarnings ] [ text "display warnings" ]
+    div [ class "form-group" ]
+        [ createSelectLine [ "smtlib2", "datalog" ] formatOfString
+        , createCheckboxLine DisplayGlobalParams "display global parameters"
+        , createCheckboxLine DisplayGlobalParamDescs "display global parameter descriptions"
+        , createCheckboxLine DisplayStatistics "display statistics"
+        , createCheckboxLine DisplayWarnings "display warnings"
         ]
 
 

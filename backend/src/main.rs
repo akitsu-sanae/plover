@@ -2,7 +2,6 @@
 extern crate lambda_runtime as lambda;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use]
 extern crate log;
 extern crate simple_logger;
 
@@ -13,6 +12,7 @@ use std::error::Error;
 
 #[derive(Deserialize, Clone)]
 enum Argments {
+    #[serde(rename = "z3")]
     Z3(z3::Argments),
 }
 

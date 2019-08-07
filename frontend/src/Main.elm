@@ -21,16 +21,6 @@ main =
         }
 
 
-stringfyOutput : Maybe String -> String
-stringfyOutput x =
-    case x of
-        Just str ->
-            str
-
-        Nothing ->
-            ""
-
-
 
 -- MODEL
 
@@ -159,23 +149,41 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ select [ onChange Solver ]
-            [ option [ value "z3" ] [ text "z3" ]
-            , option [ value "cvc4" ] [ text "cvc4" ]
+    div [ class "container" ]
+        [ div [ class "columns col-oneline" ]
+            [ div [ class "column col-2" ] (createParamsUi model.params)
+            , div [ class "column col-10" ] (createMainUi model.output)
             ]
-        , createParamsUi model.params
-        , br [] []
-        , textarea [ cols 40, rows 10, placeholder "...", onInput Input ] []
-        , br [] []
-        , button [ onClick Verify ] [ text "verify!" ]
-        , br [] []
-        , textarea [ cols 40, rows 10, placeholder "output" ] [ text <| stringfyOutput model.output ]
         ]
 
 
-createParamsUi : Params -> Html Msg
+createParamsUi : Params -> List (Html Msg)
 createParamsUi params =
+    [ createSelectLine [ "z3", "cvc4" ] Solver
+    , createSolverParamsUi params
+    ]
+
+
+createMainUi : Maybe String -> List (Html Msg)
+createMainUi output =
+    case output of
+        Just out ->
+            [ textarea [ style "width" "80%", style "height" "40%", style "resize" "none", placeholder "...", onInput Input ] []
+            , br [] []
+            , button [ onClick Verify ] [ text "verify!" ]
+            , br [] []
+            , textarea [ style "width" "80%", style "height" "40%", style "resize" "none", placeholder "<output>" ] [ text out ]
+            ]
+
+        Nothing ->
+            [ textarea [ style "width" "80%", style "height" "40%", style "resize" "none", placeholder "...", onInput Input ] []
+            , br [] []
+            , button [ onClick Verify ] [ text "verify!" ]
+            ]
+
+
+createSolverParamsUi : Params -> Html Msg
+createSolverParamsUi params =
     case params of
         Z3 z3params ->
             Html.map (\msg -> Z3Msg msg) <| Z3.createUi z3params

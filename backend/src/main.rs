@@ -5,6 +5,7 @@ extern crate serde_derive;
 extern crate log;
 extern crate simple_logger;
 
+mod cvc4;
 mod z3;
 
 use lambda::error::HandlerError;
@@ -14,15 +15,9 @@ use std::error::Error;
 enum Argments {
     #[serde(rename = "z3")]
     Z3(z3::Argments),
-}
 
-impl Argments {
-    fn to_commandline(&self) -> Vec<String> {
-        use Argments::Z3;
-        match self {
-            Z3(z3_argments) => z3_argments.to_commandline(),
-        }
-    }
+    #[serde(rename = "cvc4")]
+    Cvc4(cvc4::Argments),
 }
 
 #[derive(Deserialize, Clone)]
@@ -55,15 +50,29 @@ fn handler(e: Event, _c: lambda::Context) -> Result<Output, HandlerError> {
         tmp.write_all(e.src.as_bytes()).unwrap();
     }
 
-    let args = e.argments.to_commandline();
-    let args: Vec<&str> = args.iter().map(|arg| arg.as_str()).collect();
-
     use std::process::Command;
-    let output = Command::new("./z3")
+    // let output = Command::new("ls").arg("-R").output().unwrap();
+
+    use Argments::{Cvc4, Z3};
+    let (mut command, args) = match e.argments {
+        Z3(args) => {
+            let args = args.to_commandline();
+            (Command::new("./z3"), args)
+        }
+        Cvc4(args) => {
+            let args = args.to_commandline();
+            (Command::new("./cvc4"), args)
+        }
+    };
+
+    let args: Vec<&str> = args.iter().map(|arg| arg.as_str()).collect();
+    let output = command
+        .env("LD_LIBRARY_PATH", ".:$LD_LIBRARY_PATH")
         .args(args.into_iter())
         .arg("/tmp/source.smt2")
         .output()
         .expect("failed to execute z3");
+
     Ok(Output {
         exit: output.status.code().unwrap(),
         stdout: String::from_utf8(output.stdout).unwrap(),

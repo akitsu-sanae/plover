@@ -5127,17 +5127,96 @@ var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
 var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$none;
 };
-var author$project$Cvc4$Params = function (format) {
-	return {format: format};
+var author$project$Cvc4$Auto = {$: 'Auto'};
+var author$project$Cvc4$OAuto = {$: 'OAuto'};
+var author$project$Cvc4$Params = function (lang) {
+	return function (outputLang) {
+		return function (verbosity) {
+			return function (seed) {
+				return function (cpuTime) {
+					return function (incremental) {
+						return function (resourceLimitPer) {
+							return function (resourceLimit) {
+								return function (timeLimitPer) {
+									return function (timeLimit) {
+										return function (approxBranchDepth) {
+											return function (arithNoPartialFun) {
+												return {approxBranchDepth: approxBranchDepth, arithNoPartialFun: arithNoPartialFun, cpuTime: cpuTime, incremental: incremental, lang: lang, outputLang: outputLang, resourceLimit: resourceLimit, resourceLimitPer: resourceLimitPer, seed: seed, timeLimit: timeLimit, timeLimitPer: timeLimitPer, verbosity: verbosity};
+											};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
 };
-var author$project$Cvc4$Smtlib2 = {$: 'Smtlib2'};
-var author$project$Cvc4$default = author$project$Cvc4$Params(author$project$Cvc4$Smtlib2);
+var author$project$Cvc4$default = author$project$Cvc4$Params(author$project$Cvc4$Auto)(author$project$Cvc4$OAuto)(0)(elm$core$Maybe$Nothing)(false)(false)(elm$core$Maybe$Nothing)(elm$core$Maybe$Nothing)(elm$core$Maybe$Nothing)(elm$core$Maybe$Nothing)(elm$core$Maybe$Nothing)(false);
+var elm$core$Basics$not = _Basics_not;
 var author$project$Cvc4$update = F2(
 	function (msg, params) {
-		var format = msg.a;
-		return _Utils_update(
-			params,
-			{format: format});
+		switch (msg.$) {
+			case 'Lang':
+				var lang = msg.a;
+				return _Utils_update(
+					params,
+					{lang: lang});
+			case 'OutputLang':
+				var outputLang = msg.a;
+				return _Utils_update(
+					params,
+					{outputLang: outputLang});
+			case 'Verbosity':
+				var n = msg.a;
+				return _Utils_update(
+					params,
+					{verbosity: n});
+			case 'Seed':
+				var n = msg.a;
+				return _Utils_update(
+					params,
+					{seed: n});
+			case 'CpuTime':
+				return _Utils_update(
+					params,
+					{cpuTime: !params.cpuTime});
+			case 'Incremental':
+				return _Utils_update(
+					params,
+					{incremental: !params.incremental});
+			case 'ResourceLimitPer':
+				var limit = msg.a;
+				return _Utils_update(
+					params,
+					{resourceLimitPer: limit});
+			case 'ResourceLimit':
+				var limit = msg.a;
+				return _Utils_update(
+					params,
+					{resourceLimit: limit});
+			case 'TimeLimitPer':
+				var limit = msg.a;
+				return _Utils_update(
+					params,
+					{timeLimitPer: limit});
+			case 'TimeLimit':
+				var limit = msg.a;
+				return _Utils_update(
+					params,
+					{timeLimit: limit});
+			case 'ApproxBranchDepth':
+				var depth = msg.a;
+				return _Utils_update(
+					params,
+					{approxBranchDepth: depth});
+			default:
+				return _Utils_update(
+					params,
+					{arithNoPartialFun: !params.arithNoPartialFun});
+		}
 	});
 var author$project$Main$Cvc4 = function (a) {
 	return {$: 'Cvc4', a: a};
@@ -5145,6 +5224,66 @@ var author$project$Main$Cvc4 = function (a) {
 var author$project$Main$GotResult = function (a) {
 	return {$: 'GotResult', a: a};
 };
+var elm$json$Json$Encode$string = _Json_wrap;
+var author$project$Cvc4$jsonOfLang = function (lang) {
+	return elm$json$Json$Encode$string(
+		function () {
+			switch (lang.$) {
+				case 'Auto':
+					return 'auto';
+				case 'Cvc4':
+					return 'cvc4';
+				case 'Smtlib1':
+					return 'smtlib1';
+				case 'Smtlib2':
+					return 'smtlib2.0';
+				case 'Smtlib25':
+					return 'smtlib2.5';
+				case 'Smtlib26':
+					return 'smtlib2.6';
+				case 'Smtlib261':
+					return 'smtlib2.6.1';
+				case 'Tptp':
+					return 'tptp';
+				default:
+					return 'sygus';
+			}
+		}());
+};
+var elm$core$Debug$todo = _Debug_todo;
+var author$project$Util$undefined = function (_n0) {
+	return _Debug_todo(
+		'Util',
+		{
+			start: {line: 12, column: 5},
+			end: {line: 12, column: 15}
+		})('<undefined>');
+};
+var author$project$Cvc4$jsonOfOutputLang = function (outputLang) {
+	return elm$json$Json$Encode$string(
+		function () {
+			switch (outputLang.$) {
+				case 'OAuto':
+					return 'auto';
+				case 'OCvc4':
+					return 'cvc4';
+				case 'OCvc3':
+					return 'cvc3';
+				case 'OSmtlib2':
+					return 'smtlib2.0';
+				case 'OSmtlib25':
+					return 'smtlib2.5';
+				case 'OSmtlib26':
+					return 'smtlib2.6';
+				case 'OSmtlib261':
+					return 'smtlib2.6.1';
+				default:
+					return author$project$Util$undefined(_Utils_Tuple0);
+			}
+		}());
+};
+var elm$json$Json$Encode$bool = _Json_wrap;
+var elm$json$Json$Encode$int = _Json_wrap;
 var elm$json$Json$Encode$object = function (pairs) {
 	return _Json_wrap(
 		A3(
@@ -5164,10 +5303,27 @@ var author$project$Cvc4$createJson = function (params) {
 			[
 				_Utils_Tuple2(
 				'cvc4',
-				elm$json$Json$Encode$object(_List_Nil))
+				elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'lang',
+							author$project$Cvc4$jsonOfLang(params.lang)),
+							_Utils_Tuple2(
+							'output lang',
+							author$project$Cvc4$jsonOfOutputLang(params.outputLang)),
+							_Utils_Tuple2(
+							'verbosity',
+							elm$json$Json$Encode$int(params.verbosity)),
+							_Utils_Tuple2(
+							'cpu time',
+							elm$json$Json$Encode$bool(params.cpuTime)),
+							_Utils_Tuple2(
+							'incremental',
+							elm$json$Json$Encode$bool(params.incremental))
+						])))
 			]));
 };
-var elm$json$Json$Encode$string = _Json_wrap;
 var author$project$Z3$jsonOfFormat = function (format) {
 	return elm$json$Json$Encode$string(
 		function () {
@@ -5189,7 +5345,6 @@ var author$project$Z3$jsonOfFormat = function (format) {
 			}
 		}());
 };
-var elm$json$Json$Encode$bool = _Json_wrap;
 var author$project$Z3$createJson = function (params) {
 	return elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -6057,16 +6212,6 @@ var author$project$Util$toString = function (err) {
 			return 'BadBody: ' + body;
 	}
 };
-var elm$core$Debug$todo = _Debug_todo;
-var author$project$Util$undefined = function (_n0) {
-	return _Debug_todo(
-		'Util',
-		{
-			start: {line: 12, column: 5},
-			end: {line: 12, column: 15}
-		})('<undefined>');
-};
-var elm$core$Basics$not = _Basics_not;
 var author$project$Z3$update = F2(
 	function (msg, params) {
 		switch (msg.$) {
@@ -6405,44 +6550,107 @@ var author$project$Main$createMainUi = F2(
 var author$project$Main$Solver = function (a) {
 	return {$: 'Solver', a: a};
 };
-var author$project$Cvc4$Format = function (a) {
-	return {$: 'Format', a: a};
+var author$project$Cvc4$Cvc4 = {$: 'Cvc4'};
+var author$project$Cvc4$Lang = function (a) {
+	return {$: 'Lang', a: a};
 };
-var author$project$Cvc4$formatOfString = function (str) {
-	if (str === 'smtlib2') {
-		return author$project$Cvc4$Format(author$project$Cvc4$Smtlib2);
-	} else {
-		return author$project$Util$undefined(_Utils_Tuple0);
-	}
+var author$project$Cvc4$langOfString = function (str) {
+	return author$project$Cvc4$Lang(
+		function () {
+			switch (str) {
+				case 'auto':
+					return author$project$Cvc4$Auto;
+				case 'cvc4':
+					return author$project$Cvc4$Cvc4;
+				default:
+					return author$project$Util$undefined(_Utils_Tuple0);
+			}
+		}());
 };
+var author$project$Cvc4$OCvc4 = {$: 'OCvc4'};
+var author$project$Cvc4$OutputLang = function (a) {
+	return {$: 'OutputLang', a: a};
+};
+var author$project$Cvc4$outputLangOfString = function (str) {
+	return author$project$Cvc4$OutputLang(
+		function () {
+			switch (str) {
+				case 'auto':
+					return author$project$Cvc4$OAuto;
+				case 'cvc4':
+					return author$project$Cvc4$OCvc4;
+				default:
+					return author$project$Util$undefined(_Utils_Tuple0);
+			}
+		}());
+};
+var author$project$Util$onChange = function (handler) {
+	return A2(
+		elm$html$Html$Events$on,
+		'change',
+		A2(elm$json$Json$Decode$map, handler, elm$html$Html$Events$targetValue));
+};
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
 var elm$html$Html$option = _VirtualDom_node('option');
 var elm$html$Html$select = _VirtualDom_node('select');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
-var author$project$Cvc4$createUi = function (params) {
-	return A2(
-		elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				elm$html$Html$select,
-				_List_fromArray(
-					[
-						elm$html$Html$Events$onInput(author$project$Cvc4$formatOfString)
-					]),
-				_List_fromArray(
-					[
-						A2(
+var author$project$Util$createSelectLine = F2(
+	function (options, msg) {
+		return A2(
+			elm$html$Html$select,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('form-select'),
+					author$project$Util$onChange(msg)
+				]),
+			A2(
+				elm$core$List$map,
+				function (opt) {
+					return A2(
 						elm$html$Html$option,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$value('smtlib2')
+								elm$html$Html$Attributes$value(opt)
 							]),
 						_List_fromArray(
 							[
-								elm$html$Html$text('smtlib2')
-							]))
-					]))
+								elm$html$Html$text(opt)
+							]));
+				},
+				options));
+	});
+var author$project$Cvc4$createUi = function (params) {
+	return A2(
+		elm$html$Html$div,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('form-group')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				author$project$Util$createSelectLine,
+				_List_fromArray(
+					['auto', 'cvc4', 'smtlib1.0', 'smtlib2.0', 'smtlib2.5', 'smtlib2.6', 'smtlib2.6.1', 'tptp', 'sygus']),
+				author$project$Cvc4$langOfString),
+				A2(
+				author$project$Util$createSelectLine,
+				_List_fromArray(
+					['auto', 'cvc4', 'cvc3', 'smtlib2.0', 'smtlib2.5', 'smtlib2.6', 'smtlib2.6.1', 'tptp', 'z3str', 'ast']),
+				author$project$Cvc4$outputLangOfString)
 			]));
 };
 var author$project$Main$Cvc4Msg = function (a) {
@@ -6481,51 +6689,6 @@ var author$project$Util$createCheckboxLine = F2(
 					_List_Nil),
 					elm$html$Html$text(desc)
 				]));
-	});
-var author$project$Util$onChange = function (handler) {
-	return A2(
-		elm$html$Html$Events$on,
-		'change',
-		A2(elm$json$Json$Decode$map, handler, elm$html$Html$Events$targetValue));
-};
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
-var author$project$Util$createSelectLine = F2(
-	function (options, msg) {
-		return A2(
-			elm$html$Html$select,
-			_List_fromArray(
-				[
-					elm$html$Html$Attributes$class('form-select'),
-					author$project$Util$onChange(msg)
-				]),
-			A2(
-				elm$core$List$map,
-				function (opt) {
-					return A2(
-						elm$html$Html$option,
-						_List_fromArray(
-							[
-								elm$html$Html$Attributes$value(opt)
-							]),
-						_List_fromArray(
-							[
-								elm$html$Html$text(opt)
-							]));
-				},
-				options));
 	});
 var author$project$Z3$DisplayGlobalParamDescs = {$: 'DisplayGlobalParamDescs'};
 var author$project$Z3$DisplayGlobalParams = {$: 'DisplayGlobalParams'};

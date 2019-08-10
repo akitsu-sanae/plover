@@ -70,7 +70,7 @@ pub struct Argments {
     output_lang: OutputLang,
 
     #[serde(rename = "verbosity")]
-    verbosity: Option<i32>,
+    verbosity: i32,
 
     #[serde(rename = "seed")]
     seed: Option<i32>,
@@ -130,14 +130,12 @@ impl Argments {
             }
         ));
 
-        if let Some(n) = self.verbosity {
-            for _ in 0..n.abs() {
-                result.push(if n >= 0 {
-                    "--verbose".to_string()
-                } else {
-                    "--quiet".to_string()
-                });
-            }
+        for _ in 0..self.verbosity.abs() {
+            result.push(if self.verbosity >= 0 {
+                "--verbose".to_string()
+            } else {
+                "--quiet".to_string()
+            });
         }
 
         if let Some(n) = self.seed {

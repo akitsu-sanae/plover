@@ -2,7 +2,7 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Cvc4 exposing (..)
-import Html exposing (Html, br, button, div, option, select, text, textarea)
+import Html exposing (Html, aside, br, button, div, h1, header, label, li, option, select, text, textarea, ul)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -34,12 +34,13 @@ type alias Model =
     { params : Params
     , input : String
     , output : Maybe String
+    , isLoading : Bool
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Z3 Z3.default) "" Nothing, Cmd.none )
+    ( Model (Z3 Z3.default) "" Nothing False, Cmd.none )
 
 
 
@@ -89,15 +90,15 @@ update msg model =
             ( { model | input = src }, Cmd.none )
 
         Verify ->
-            ( model, getVerificationResult model )
+            ( { model | isLoading = True }, getVerificationResult model )
 
         GotResult result ->
             case result of
                 Ok json ->
-                    ( { model | output = Just json }, Cmd.none )
+                    ( { model | output = Just json, isLoading = False }, Cmd.none )
 
                 Err err ->
-                    ( { model | output = Just <| toString err }, Cmd.none )
+                    ( { model | output = Just <| toString err, isLoading = False }, Cmd.none )
 
 
 
@@ -150,36 +151,61 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ div [ class "columns col-oneline" ]
-            [ div [ class "column col-2" ] (createParamsUi model.params)
-            , div [ class "column col-10" ] (createMainUi model.output)
+        [ header [] [ h1 [] [ text "Plover" ] ]
+        , div [ class "columns" ]
+            [ div [ class "column col-3" ] [ createParamsUi model.params ]
+            , div [ class "column col-8" ] [ createMainUi model.output model.isLoading ]
             ]
         ]
 
 
-createParamsUi : Params -> List (Html Msg)
+createParamsUi : Params -> Html Msg
 createParamsUi params =
-    [ createSelectLine [ "z3", "cvc4" ] Solver
-    , createSolverParamsUi params
-    ]
+    ul [ class "menu" ]
+        [ li [ class "menu-item" ] [ createSelectLine [ "z3", "cvc4" ] Solver ]
+        , li [ class "divider" ] []
+        , li [ class "menu-item" ] [ createSolverParamsUi params ]
+        ]
 
 
-createMainUi : Maybe String -> List (Html Msg)
-createMainUi output =
-    case output of
-        Just out ->
-            [ textarea [ style "width" "80%", style "height" "40%", style "resize" "none", placeholder "...", onInput Input ] []
-            , br [] []
-            , button [ onClick Verify ] [ text "verify!" ]
-            , br [] []
-            , textarea [ style "width" "80%", style "height" "40%", style "resize" "none", placeholder "<output>" ] [ text out ]
+
+{-
+   [ createSelectLine [ "z3", "cvc4" ] Solver
+   , createSolverParamsUi params
+   ]
+
+
+-}
+
+
+createMainUi : Maybe String -> Bool -> Html Msg
+createMainUi output isLoading =
+    div [ class "form-group" ] <|
+        [ label [ class "form-label", for "input-area" ] [ text "Query to Solver:" ]
+        , textarea [ class "input-area form-input", onInput Input ] []
+        , br [] []
+        , button
+            [ class
+                (if isLoading then
+                    "btn loading"
+
+                 else
+                    "btn"
+                )
+            , onClick Verify
             ]
+            [ text "verify!" ]
+        ]
+            ++ (case output of
+                    Nothing ->
+                        []
 
-        Nothing ->
-            [ textarea [ style "width" "80%", style "height" "40%", style "resize" "none", placeholder "...", onInput Input ] []
-            , br [] []
-            , button [ onClick Verify ] [ text "verify!" ]
-            ]
+                    Just out ->
+                        [ br [] []
+                        , label [ class "form-label", for "output-area" ] [ text "Response from Solver:" ]
+                        , textarea [ class "output-area form-input" ] [ text out ]
+                        ]
+               )
 
 
 createSolverParamsUi : Params -> Html Msg

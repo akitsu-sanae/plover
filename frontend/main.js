@@ -4485,9 +4485,9 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Main$Model = F3(
-	function (params, input, output) {
-		return {input: input, output: output, params: params};
+var author$project$Main$Model = F4(
+	function (params, input, output, isLoading) {
+		return {input: input, isLoading: isLoading, output: output, params: params};
 	});
 var author$project$Main$Z3 = function (a) {
 	return {$: 'Z3', a: a};
@@ -5114,11 +5114,12 @@ var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
-		A3(
+		A4(
 			author$project$Main$Model,
 			author$project$Main$Z3(author$project$Z3$default),
 			'',
-			elm$core$Maybe$Nothing),
+			elm$core$Maybe$Nothing,
+			false),
 		elm$core$Platform$Cmd$none);
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
@@ -6211,7 +6212,9 @@ var author$project$Main$update = F2(
 					elm$core$Platform$Cmd$none);
 			case 'Verify':
 				return _Utils_Tuple2(
-					model,
+					_Utils_update(
+						model,
+						{isLoading: true}),
 					author$project$Main$getVerificationResult(model));
 			default:
 				var result = msg.a;
@@ -6221,6 +6224,7 @@ var author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
+								isLoading: false,
 								output: elm$core$Maybe$Just(json)
 							}),
 						elm$core$Platform$Cmd$none);
@@ -6230,6 +6234,7 @@ var author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
+								isLoading: false,
 								output: elm$core$Maybe$Just(
 									author$project$Util$toString(err))
 							}),
@@ -6258,6 +6263,8 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 };
 var elm$html$Html$br = _VirtualDom_node('br');
 var elm$html$Html$button = _VirtualDom_node('button');
+var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$label = _VirtualDom_node('label');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$html$Html$textarea = _VirtualDom_node('textarea');
@@ -6268,9 +6275,8 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			elm$json$Json$Encode$string(string));
 	});
-var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
-var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$html$Html$Attributes$for = elm$html$Html$Attributes$stringProperty('htmlFor');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6319,76 +6325,83 @@ var elm$html$Html$Events$onInput = function (tagger) {
 			elm$html$Html$Events$alwaysStop,
 			A2(elm$json$Json$Decode$map, tagger, elm$html$Html$Events$targetValue)));
 };
-var author$project$Main$createMainUi = function (output) {
-	if (output.$ === 'Just') {
-		var out = output.a;
-		return _List_fromArray(
-			[
-				A2(
-				elm$html$Html$textarea,
+var author$project$Main$createMainUi = F2(
+	function (output, isLoading) {
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('form-group')
+				]),
+			_Utils_ap(
 				_List_fromArray(
 					[
-						A2(elm$html$Html$Attributes$style, 'width', '80%'),
-						A2(elm$html$Html$Attributes$style, 'height', '40%'),
-						A2(elm$html$Html$Attributes$style, 'resize', 'none'),
-						elm$html$Html$Attributes$placeholder('...'),
-						elm$html$Html$Events$onInput(author$project$Main$Input)
+						A2(
+						elm$html$Html$label,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('form-label'),
+								elm$html$Html$Attributes$for('input-area')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Query to Solver:')
+							])),
+						A2(
+						elm$html$Html$textarea,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('input-area form-input'),
+								elm$html$Html$Events$onInput(author$project$Main$Input)
+							]),
+						_List_Nil),
+						A2(elm$html$Html$br, _List_Nil, _List_Nil),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class(
+								isLoading ? 'btn loading' : 'btn'),
+								elm$html$Html$Events$onClick(author$project$Main$Verify)
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('verify!')
+							]))
 					]),
-				_List_Nil),
-				A2(elm$html$Html$br, _List_Nil, _List_Nil),
-				A2(
-				elm$html$Html$button,
-				_List_fromArray(
-					[
-						elm$html$Html$Events$onClick(author$project$Main$Verify)
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('verify!')
-					])),
-				A2(elm$html$Html$br, _List_Nil, _List_Nil),
-				A2(
-				elm$html$Html$textarea,
-				_List_fromArray(
-					[
-						A2(elm$html$Html$Attributes$style, 'width', '80%'),
-						A2(elm$html$Html$Attributes$style, 'height', '40%'),
-						A2(elm$html$Html$Attributes$style, 'resize', 'none'),
-						elm$html$Html$Attributes$placeholder('<output>')
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text(out)
-					]))
-			]);
-	} else {
-		return _List_fromArray(
-			[
-				A2(
-				elm$html$Html$textarea,
-				_List_fromArray(
-					[
-						A2(elm$html$Html$Attributes$style, 'width', '80%'),
-						A2(elm$html$Html$Attributes$style, 'height', '40%'),
-						A2(elm$html$Html$Attributes$style, 'resize', 'none'),
-						elm$html$Html$Attributes$placeholder('...'),
-						elm$html$Html$Events$onInput(author$project$Main$Input)
-					]),
-				_List_Nil),
-				A2(elm$html$Html$br, _List_Nil, _List_Nil),
-				A2(
-				elm$html$Html$button,
-				_List_fromArray(
-					[
-						elm$html$Html$Events$onClick(author$project$Main$Verify)
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('verify!')
-					]))
-			]);
-	}
-};
+				function () {
+					if (output.$ === 'Nothing') {
+						return _List_Nil;
+					} else {
+						var out = output.a;
+						return _List_fromArray(
+							[
+								A2(elm$html$Html$br, _List_Nil, _List_Nil),
+								A2(
+								elm$html$Html$label,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$class('form-label'),
+										elm$html$Html$Attributes$for('output-area')
+									]),
+								_List_fromArray(
+									[
+										elm$html$Html$text('Response from Solver:')
+									])),
+								A2(
+								elm$html$Html$textarea,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$class('output-area form-input')
+									]),
+								_List_fromArray(
+									[
+										elm$html$Html$text(out)
+									]))
+							]);
+					}
+				}()));
+	});
 var author$project$Main$Solver = function (a) {
 	return {$: 'Solver', a: a};
 };
@@ -6402,7 +6415,6 @@ var author$project$Cvc4$formatOfString = function (str) {
 		return author$project$Util$undefined(_Utils_Tuple0);
 	}
 };
-var elm$html$Html$div = _VirtualDom_node('div');
 var elm$html$Html$option = _VirtualDom_node('option');
 var elm$html$Html$select = _VirtualDom_node('select');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
@@ -6441,8 +6453,6 @@ var author$project$Main$Z3Msg = function (a) {
 };
 var elm$html$Html$i = _VirtualDom_node('i');
 var elm$html$Html$input = _VirtualDom_node('input');
-var elm$html$Html$label = _VirtualDom_node('label');
-var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
 var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var author$project$Util$createCheckboxLine = F2(
 	function (msg, desc) {
@@ -6572,17 +6582,52 @@ var author$project$Main$createSolverParamsUi = function (params) {
 			author$project$Cvc4$createUi(cvc4params));
 	}
 };
+var elm$html$Html$li = _VirtualDom_node('li');
+var elm$html$Html$ul = _VirtualDom_node('ul');
 var author$project$Main$createParamsUi = function (params) {
-	return _List_fromArray(
-		[
-			A2(
-			author$project$Util$createSelectLine,
-			_List_fromArray(
-				['z3', 'cvc4']),
-			author$project$Main$Solver),
-			author$project$Main$createSolverParamsUi(params)
-		]);
+	return A2(
+		elm$html$Html$ul,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('menu')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$li,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('menu-item')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						author$project$Util$createSelectLine,
+						_List_fromArray(
+							['z3', 'cvc4']),
+						author$project$Main$Solver)
+					])),
+				A2(
+				elm$html$Html$li,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('divider')
+					]),
+				_List_Nil),
+				A2(
+				elm$html$Html$li,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('menu-item')
+					]),
+				_List_fromArray(
+					[
+						author$project$Main$createSolverParamsUi(params)
+					]))
+			]));
 };
+var elm$html$Html$h1 = _VirtualDom_node('h1');
+var elm$html$Html$header = _VirtualDom_node('header');
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -6593,10 +6638,23 @@ var author$project$Main$view = function (model) {
 		_List_fromArray(
 			[
 				A2(
+				elm$html$Html$header,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('Plover')
+							]))
+					])),
+				A2(
 				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('columns col-oneline')
+						elm$html$Html$Attributes$class('columns')
 					]),
 				_List_fromArray(
 					[
@@ -6604,16 +6662,22 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$div,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$class('column col-2')
+								elm$html$Html$Attributes$class('column col-3')
 							]),
-						author$project$Main$createParamsUi(model.params)),
+						_List_fromArray(
+							[
+								author$project$Main$createParamsUi(model.params)
+							])),
 						A2(
 						elm$html$Html$div,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$class('column col-10')
+								elm$html$Html$Attributes$class('column col-8')
 							]),
-						author$project$Main$createMainUi(model.output))
+						_List_fromArray(
+							[
+								A2(author$project$Main$createMainUi, model.output, model.isLoading)
+							]))
 					]))
 			]));
 };

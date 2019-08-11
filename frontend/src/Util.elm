@@ -1,10 +1,11 @@
-module Util exposing (createCheckboxLine, createSelectLine, onChange, toString, undefined)
+module Util exposing (createCheckboxLine, createSelectLine, jsonOfMaybeInt, onChange, toString, undefined)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events as Events exposing (..)
 import Http
 import Json.Decode as Json
+import Json.Encode
 
 
 undefined : () -> a
@@ -54,3 +55,13 @@ createCheckboxLine msg desc =
         , i [ class "form-icon" ] []
         , text desc
         ]
+
+
+jsonOfMaybeInt : String -> Maybe Int -> List ( String, Json.Encode.Value )
+jsonOfMaybeInt str x =
+    case x of
+        Nothing ->
+            []
+
+        Just n ->
+            [ ( str, Json.Encode.int n ) ]

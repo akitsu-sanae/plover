@@ -182,9 +182,15 @@ createJson params =
                         , ( "warnings", Json.Encode.bool params.display.warnings )
                         ]
                   )
-                , ( "limit", Json.Encode.object [] )
-                , ( "global_parameters", Json.Encode.object [] )
-                , ( "module_parameters", Json.Encode.object [] )
+                , ( "limit"
+                  , Json.Encode.object
+                        (jsonOfMaybeInt "timeout" params.limit.timeout
+                            ++ jsonOfMaybeInt "soft timeout" params.limit.softTimeout
+                            ++ jsonOfMaybeInt "memory" params.limit.memory
+                        )
+                  )
+                , ( "global_parameters", Json.Encode.object (Dict.values <| Dict.map (\name value -> ( name, Json.Encode.string value )) params.globalParams) )
+                , ( "module_parameters", Json.Encode.object (Dict.values <| Dict.map (\( moduleName, paramName ) value -> ( moduleName ++ "." ++ paramName, Json.Encode.string value )) params.moduleParams) )
                 ]
           )
         ]

@@ -5255,8 +5255,8 @@ var author$project$Util$undefined = function (_n0) {
 	return _Debug_todo(
 		'Util',
 		{
-			start: {line: 12, column: 5},
-			end: {line: 12, column: 15}
+			start: {line: 13, column: 5},
+			end: {line: 13, column: 15}
 		})('<undefined>');
 };
 var author$project$Cvc4$jsonOfOutputLang = function (outputLang) {
@@ -5324,6 +5324,20 @@ var author$project$Cvc4$createJson = function (params) {
 						])))
 			]));
 };
+var author$project$Util$jsonOfMaybeInt = F2(
+	function (str, x) {
+		if (x.$ === 'Nothing') {
+			return _List_Nil;
+		} else {
+			var n = x.a;
+			return _List_fromArray(
+				[
+					_Utils_Tuple2(
+					str,
+					elm$json$Json$Encode$int(n))
+				]);
+		}
+	});
 var author$project$Z3$jsonOfFormat = function (format) {
 	return elm$json$Json$Encode$string(
 		function () {
@@ -5344,6 +5358,35 @@ var author$project$Z3$jsonOfFormat = function (format) {
 					return 'Z3 log';
 			}
 		}());
+};
+var elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2(elm$core$Dict$map, func, left),
+				A2(elm$core$Dict$map, func, right));
+		}
+	});
+var elm$core$Dict$values = function (dict) {
+	return A3(
+		elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2(elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
 };
 var author$project$Z3$createJson = function (params) {
 	return elm$json$Json$Encode$object(
@@ -5377,13 +5420,40 @@ var author$project$Z3$createJson = function (params) {
 									]))),
 							_Utils_Tuple2(
 							'limit',
-							elm$json$Json$Encode$object(_List_Nil)),
+							elm$json$Json$Encode$object(
+								_Utils_ap(
+									A2(author$project$Util$jsonOfMaybeInt, 'timeout', params.limit.timeout),
+									_Utils_ap(
+										A2(author$project$Util$jsonOfMaybeInt, 'soft timeout', params.limit.softTimeout),
+										A2(author$project$Util$jsonOfMaybeInt, 'memory', params.limit.memory))))),
 							_Utils_Tuple2(
 							'global_parameters',
-							elm$json$Json$Encode$object(_List_Nil)),
+							elm$json$Json$Encode$object(
+								elm$core$Dict$values(
+									A2(
+										elm$core$Dict$map,
+										F2(
+											function (name, value) {
+												return _Utils_Tuple2(
+													name,
+													elm$json$Json$Encode$string(value));
+											}),
+										params.globalParams)))),
 							_Utils_Tuple2(
 							'module_parameters',
-							elm$json$Json$Encode$object(_List_Nil))
+							elm$json$Json$Encode$object(
+								elm$core$Dict$values(
+									A2(
+										elm$core$Dict$map,
+										F2(
+											function (_n0, value) {
+												var moduleName = _n0.a;
+												var paramName = _n0.b;
+												return _Utils_Tuple2(
+													moduleName + ('.' + paramName),
+													elm$json$Json$Encode$string(value));
+											}),
+										params.moduleParams))))
 						])))
 			]));
 };

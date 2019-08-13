@@ -5,6 +5,7 @@ import Html exposing (Html, br, div, input, option, select, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode
+import UiUtil exposing (..)
 import Util exposing (..)
 
 
@@ -92,11 +93,8 @@ update msg params =
 
                 oldDisplay =
                     params.display
-
-                display =
-                    { oldDisplay | globalParams = globalParams }
             in
-            { params | display = display }
+            { params | display = { oldDisplay | globalParams = globalParams } }
 
         DisplayGlobalParamDescs ->
             let
@@ -105,11 +103,8 @@ update msg params =
 
                 oldDisplay =
                     params.display
-
-                display =
-                    { oldDisplay | globalParamDescs = globalParamDescs }
             in
-            { params | display = display }
+            { params | display = { oldDisplay | globalParamDescs = globalParamDescs } }
 
         DisplayStatistics ->
             let
@@ -118,11 +113,8 @@ update msg params =
 
                 oldDisplay =
                     params.display
-
-                display =
-                    { oldDisplay | statistics = statistics }
             in
-            { params | display = display }
+            { params | display = { oldDisplay | statistics = statistics } }
 
         DisplayWarnings ->
             let
@@ -131,41 +123,29 @@ update msg params =
 
                 oldDisplay =
                     params.display
-
-                display =
-                    { oldDisplay | warnings = warnings }
             in
-            { params | display = display }
+            { params | display = { oldDisplay | warnings = warnings } }
 
         Timeout n ->
             let
                 oldLimit =
                     params.limit
-
-                limit =
-                    { oldLimit | timeout = n }
             in
-            { params | limit = limit }
+            { params | limit = { oldLimit | timeout = n } }
 
         SoftTimeout n ->
             let
                 oldLimit =
                     params.limit
-
-                limit =
-                    { oldLimit | softTimeout = n }
             in
-            { params | limit = limit }
+            { params | limit = { oldLimit | softTimeout = n } }
 
         Memory n ->
             let
                 oldLimit =
                     params.limit
-
-                limit =
-                    { oldLimit | memory = n }
             in
-            { params | limit = limit }
+            { params | limit = { oldLimit | memory = n } }
 
 
 createJson : Params -> Json.Encode.Value

@@ -8,6 +8,7 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode exposing (Decoder, field, string)
 import Json.Encode
+import UiUtil exposing (..)
 import Util exposing (..)
 import Z3 exposing (..)
 
@@ -166,16 +167,6 @@ createParamsUi params =
         , li [ class "divider" ] []
         , li [ class "menu-item" ] [ createSolverParamsUi params ]
         ]
-
-
-
-{-
-   [ createSelectLine [ "z3", "cvc4" ] Solver
-   , createSolverParamsUi params
-   ]
-
-
--}
 
 
 createMainUi : Maybe String -> Bool -> Html Msg

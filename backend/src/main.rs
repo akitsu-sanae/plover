@@ -51,8 +51,6 @@ fn handler(e: Event, _c: lambda::Context) -> Result<Output, HandlerError> {
     }
 
     use std::process::Command;
-    // let output = Command::new("ls").arg("-R").output().unwrap();
-
     use Argments::{Cvc4, Z3};
     let (mut command, args) = match e.argments {
         Z3(args) => {
@@ -67,11 +65,10 @@ fn handler(e: Event, _c: lambda::Context) -> Result<Output, HandlerError> {
 
     let args: Vec<&str> = args.iter().map(|arg| arg.as_str()).collect();
     let output = command
-        .env("LD_LIBRARY_PATH", ".:$LD_LIBRARY_PATH")
         .args(args.into_iter())
         .arg("/tmp/source.smt2")
         .output()
-        .expect("failed to execute z3");
+        .expect("failed to execute the smt solver");
 
     Ok(Output {
         exit: output.status.code().unwrap(),

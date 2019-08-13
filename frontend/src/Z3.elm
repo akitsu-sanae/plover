@@ -74,9 +74,9 @@ type Msg
     | DisplayGlobalParamDescs
     | DisplayStatistics
     | DisplayWarnings
-    | Timeout Int
-    | SoftTimeout Int
-    | Memory Int
+    | Timeout (Maybe Int)
+    | SoftTimeout (Maybe Int)
+    | Memory (Maybe Int)
 
 
 update : Msg -> Params -> Params
@@ -143,7 +143,7 @@ update msg params =
                     params.limit
 
                 limit =
-                    { oldLimit | timeout = Just n }
+                    { oldLimit | timeout = n }
             in
             { params | limit = limit }
 
@@ -153,7 +153,7 @@ update msg params =
                     params.limit
 
                 limit =
-                    { oldLimit | softTimeout = Just n }
+                    { oldLimit | softTimeout = n }
             in
             { params | limit = limit }
 
@@ -163,7 +163,7 @@ update msg params =
                     params.limit
 
                 limit =
-                    { oldLimit | memory = Just n }
+                    { oldLimit | memory = n }
             in
             { params | limit = limit }
 
@@ -214,6 +214,9 @@ createUi params =
         , createCheckboxLine DisplayGlobalParamDescs "display global parameter descriptions"
         , createCheckboxLine DisplayStatistics "display statistics"
         , createCheckboxLine DisplayWarnings "display warnings"
+        , createMaybeIntInput Timeout "timeout" params.limit.timeout
+        , createMaybeIntInput SoftTimeout "soft timeout" params.limit.softTimeout
+        , createMaybeIntInput Memory "memory" params.limit.memory
         ]
 
 

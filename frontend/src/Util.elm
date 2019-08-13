@@ -57,35 +57,49 @@ createCheckboxLine msg desc =
         ]
 
 
-createMaybeIntInput : (Maybe Int -> a) -> String -> Maybe Int -> Html a
+createMaybeIntInput : (Maybe Int -> a) -> String -> Maybe Int -> List (Html a)
 createMaybeIntInput msg desc param =
-    case param of
-        Nothing ->
-            label [ class "form-checkbox" ]
-                [ input [ type_ "checkbox", onInput (\x -> msg (Just 0)) ] []
-                , text desc
-                ]
+    [ label [ class "form-checkbox" ]
+        [ input
+            [ type_ "checkbox"
+            , checked (param /= Nothing)
+            , onInput
+                (\x ->
+                    case param of
+                        Nothing ->
+                            msg (Just 0)
 
-        Just _ ->
-            label [ class "form-checkbox" ]
-                [ input [ type_ "checkbox", onInput (\x -> msg Nothing) ] []
-                , text <| desc ++ ":"
-                , input
-                    [ class "form-input"
-                    , type_ "number"
-                    , Html.Attributes.min "0"
-                    , onInput
-                        (\str ->
-                            case String.toInt str of
-                                Nothing ->
-                                    undefined ()
-
-                                Just n ->
-                                    msg (Just n)
-                        )
-                    ]
+                        Just n ->
+                            msg Nothing
+                )
+            ]
+            []
+        , i [ class "form-icon" ] []
+        , text <| desc ++ ":"
+        ]
+    ]
+        ++ (case param of
+                Nothing ->
                     []
-                ]
+
+                Just _ ->
+                    [ input
+                        [ class "form-input"
+                        , type_ "number"
+                        , Html.Attributes.min "0"
+                        , onInput
+                            (\str ->
+                                case String.toInt str of
+                                    Nothing ->
+                                        undefined ()
+
+                                    Just n ->
+                                        msg (Just n)
+                            )
+                        ]
+                        []
+                    ]
+           )
 
 
 jsonOfMaybeInt : String -> Maybe Int -> List ( String, Json.Encode.Value )

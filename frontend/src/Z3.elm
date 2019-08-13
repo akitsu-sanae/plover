@@ -208,16 +208,16 @@ formatOfString str =
 
 createUi : Params -> Html Msg
 createUi params =
-    div [ class "form-group" ]
+    div [ class "form-group" ] <|
         [ createSelectLine [ "smtlib2", "datalog" ] formatOfString
         , createCheckboxLine DisplayGlobalParams "display global parameters"
         , createCheckboxLine DisplayGlobalParamDescs "display global parameter descriptions"
         , createCheckboxLine DisplayStatistics "display statistics"
         , createCheckboxLine DisplayWarnings "display warnings"
-        , createMaybeIntInput Timeout "timeout" params.limit.timeout
-        , createMaybeIntInput SoftTimeout "soft timeout" params.limit.softTimeout
-        , createMaybeIntInput Memory "memory" params.limit.memory
         ]
+            ++ createMaybeIntInput Timeout "timeout" params.limit.timeout
+            ++ createMaybeIntInput SoftTimeout "soft timeout" params.limit.softTimeout
+            ++ createMaybeIntInput Memory "memory" params.limit.memory
 
 
 default : Params

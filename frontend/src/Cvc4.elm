@@ -21,36 +21,76 @@ type Lang
     | Sygus
 
 
+langs : List Lang
+langs =
+    [ Auto
+    , Cvc4
+    , Smtlib1
+    , Smtlib2
+    , Smtlib25
+    , Smtlib26
+    , Smtlib261
+    , Tptp
+    , Sygus
+    ]
+
+
+langString : List ( Lang, String )
+langString =
+    [ ( Auto, "auto" )
+    , ( Cvc4, "cvc4" )
+    , ( Smtlib1, "smtlib1" )
+    , ( Smtlib2, "smtlib2.0" )
+    , ( Smtlib25, "smtlib2.5" )
+    , ( Smtlib26, "smtlib2.6" )
+    , ( Smtlib261, "smtlib2.6.1" )
+    , ( Tptp, "TPTP" )
+    , ( Sygus, "SyGuS" )
+    ]
+
+
+stringOfLang : Lang -> String
+stringOfLang lang =
+    unwrap <|
+        List.foldl
+            (\( l, str ) acc ->
+                case acc of
+                    Just _ ->
+                        acc
+
+                    Nothing ->
+                        if lang == l then
+                            Just str
+
+                        else
+                            Nothing
+            )
+            Nothing
+            langString
+
+
+langOfString : String -> Maybe Lang
+langOfString str =
+    List.foldl
+        (\( lang, s ) acc ->
+            case acc of
+                Just _ ->
+                    acc
+
+                Nothing ->
+                    if str == s then
+                        Just lang
+
+                    else
+                        Nothing
+        )
+        Nothing
+        langString
+
+
 jsonOfLang : Lang -> Json.Encode.Value
 jsonOfLang lang =
-    Json.Encode.string <|
-        case lang of
-            Auto ->
-                "auto"
-
-            Cvc4 ->
-                "cvc4"
-
-            Smtlib1 ->
-                "smtlib1"
-
-            Smtlib2 ->
-                "smtlib2.0"
-
-            Smtlib25 ->
-                "smtlib2.5"
-
-            Smtlib26 ->
-                "smtlib2.6"
-
-            Smtlib261 ->
-                "smtlib2.6.1"
-
-            Tptp ->
-                "tptp"
-
-            Sygus ->
-                "sygus"
+    Json.Encode.string <| stringOfLang lang
 
 
 type OutputLang
@@ -66,34 +106,78 @@ type OutputLang
     | OAst
 
 
+outputLangs : List OutputLang
+outputLangs =
+    [ OAuto
+    , OCvc4
+    , OCvc3
+    , OSmtlib2
+    , OSmtlib25
+    , OSmtlib26
+    , OSmtlib261
+    , OTptp
+    , OZ3str
+    , OAst
+    ]
+
+
+outputLangString : List ( OutputLang, String )
+outputLangString =
+    [ ( OAuto, "auto" )
+    , ( OCvc4, "cvc4" )
+    , ( OCvc3, "cvc3" )
+    , ( OSmtlib2, "smtlib2.0" )
+    , ( OSmtlib25, "smtlib2.5" )
+    , ( OSmtlib26, "smtlib2.6" )
+    , ( OSmtlib261, "smtlib2.6.1" )
+    , ( OTptp, "TPTP" )
+    , ( OZ3str, "Z3 str" )
+    , ( OAst, "Ast" )
+    ]
+
+
+stringOfOutputLang : OutputLang -> String
+stringOfOutputLang outputLang =
+    unwrap <|
+        List.foldl
+            (\( ol, str ) acc ->
+                case acc of
+                    Just _ ->
+                        acc
+
+                    Nothing ->
+                        if outputLang == ol then
+                            Just str
+
+                        else
+                            Nothing
+            )
+            Nothing
+            outputLangString
+
+
+outputLangOfString : String -> Maybe OutputLang
+outputLangOfString str =
+    List.foldl
+        (\( outputLang, s ) acc ->
+            case acc of
+                Just _ ->
+                    acc
+
+                Nothing ->
+                    if str == s then
+                        Just outputLang
+
+                    else
+                        Nothing
+        )
+        Nothing
+        outputLangString
+
+
 jsonOfOutputLang : OutputLang -> Json.Encode.Value
 jsonOfOutputLang outputLang =
-    Json.Encode.string <|
-        case outputLang of
-            OAuto ->
-                "auto"
-
-            OCvc4 ->
-                "cvc4"
-
-            OCvc3 ->
-                "cvc3"
-
-            OSmtlib2 ->
-                "smtlib2.0"
-
-            OSmtlib25 ->
-                "smtlib2.5"
-
-            OSmtlib26 ->
-                "smtlib2.6"
-
-            OSmtlib261 ->
-                "smtlib2.6.1"
-
-            _ ->
-                -- TODO
-                undefined ()
+    Json.Encode.string <| stringOfOutputLang outputLang
 
 
 type alias Params =
@@ -182,41 +266,11 @@ createJson params =
         ]
 
 
-langOfString : String -> Msg
-langOfString str =
-    Lang <|
-        case str of
-            "auto" ->
-                Auto
-
-            "cvc4" ->
-                Cvc4
-
-            _ ->
-                -- TODO
-                undefined ()
-
-
-outputLangOfString : String -> Msg
-outputLangOfString str =
-    OutputLang <|
-        case str of
-            "auto" ->
-                OAuto
-
-            "cvc4" ->
-                OCvc4
-
-            _ ->
-                -- TODO
-                undefined ()
-
-
 createUi : Params -> Html Msg
 createUi params =
     div [ class "form-group" ]
-        [ createSelectLine [ "auto", "cvc4", "smtlib1.0", "smtlib2.0", "smtlib2.5", "smtlib2.6", "smtlib2.6.1", "tptp", "sygus" ] langOfString
-        , createSelectLine [ "auto", "cvc4", "cvc3", "smtlib2.0", "smtlib2.5", "smtlib2.6", "smtlib2.6.1", "tptp", "z3str", "ast" ] outputLangOfString
+        [ createSelectLine (List.map stringOfLang langs) (\str -> Lang <| unwrap <| langOfString str)
+        , createSelectLine (List.map stringOfOutputLang outputLangs) (\str -> OutputLang <| unwrap <| outputLangOfString str)
         ]
 
 

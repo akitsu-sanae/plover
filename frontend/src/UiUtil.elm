@@ -25,8 +25,8 @@ createSelectLine options msg =
 
 createCheckboxLine : a -> String -> Html a
 createCheckboxLine msg desc =
-    label [ class "form-checkbox" ]
-        [ input [ type_ "checkbox", onClick msg ] []
+    label [ class "form-checkbox label-sm" ]
+        [ input [ type_ "checkbox", class "input-sm", onClick msg ] []
         , i [ class "form-icon" ] []
         , text desc
         ]
@@ -34,9 +34,10 @@ createCheckboxLine msg desc =
 
 createMaybeIntInput : (Maybe Int -> a) -> String -> Maybe Int -> List (Html a)
 createMaybeIntInput msg desc param =
-    [ label [ class "form-checkbox" ]
+    [ label [ class "form-checkbox label-sm" ]
         [ input
             [ type_ "checkbox"
+            , class "input-sm"
             , checked (param /= Nothing)
             , onInput
                 (\x ->
@@ -59,7 +60,7 @@ createMaybeIntInput msg desc param =
 
                 Just _ ->
                     [ input
-                        [ class "form-input"
+                        [ class "form-input input-sm"
                         , type_ "number"
                         , Html.Attributes.min "0"
                         , onInput

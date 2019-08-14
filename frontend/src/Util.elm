@@ -1,4 +1,4 @@
-module Util exposing (jsonOfMaybeInt, toString, undefined)
+module Util exposing (jsonOfMaybeInt, toString, undefined, unwrap)
 
 import Http
 import Json.Decode as Json
@@ -37,3 +37,13 @@ jsonOfMaybeInt str x =
 
         Just n ->
             [ ( str, Json.Encode.int n ) ]
+
+
+unwrap : Maybe a -> a
+unwrap x =
+    case x of
+        Nothing ->
+            undefined ()
+
+        Just y ->
+            y

@@ -19,30 +19,72 @@ type Format
     | Z3log
 
 
+formats : List Format
+formats =
+    [ Smtlib2
+    , Datalog
+    , Dimacs
+    , WeightedCnfDimacs
+    , PbOptimization
+    , CplexLp
+    , Z3log
+    ]
+
+
+formatString : List ( Format, String )
+formatString =
+    [ ( Smtlib2, "smtlib2" )
+    , ( Datalog, "datalog" )
+    , ( Dimacs, "DIMACS" )
+    , ( WeightedCnfDimacs, "Weighted CNF DIMACS" )
+    , ( PbOptimization, "PB optimization" )
+    , ( CplexLp, "CPLEX LP" )
+    , ( Z3log, "Z3 log" )
+    ]
+
+
+stringOfFormat : Format -> String
+stringOfFormat fmt =
+    unwrap <|
+        List.foldl
+            (\( f, str ) acc ->
+                case acc of
+                    Just _ ->
+                        acc
+
+                    Nothing ->
+                        if fmt == f then
+                            Just str
+
+                        else
+                            Nothing
+            )
+            Nothing
+            formatString
+
+
+formatOfString : String -> Maybe Format
+formatOfString str =
+    List.foldl
+        (\( fmt, s ) acc ->
+            case acc of
+                Just _ ->
+                    acc
+
+                Nothing ->
+                    if str == s then
+                        Just fmt
+
+                    else
+                        Nothing
+        )
+        Nothing
+        formatString
+
+
 jsonOfFormat : Format -> Json.Encode.Value
 jsonOfFormat format =
-    Json.Encode.string <|
-        case format of
-            Smtlib2 ->
-                "smtlib2"
-
-            Datalog ->
-                "datalog"
-
-            Dimacs ->
-                "DIMACS"
-
-            WeightedCnfDimacs ->
-                "Weighted CNF DIMACS"
-
-            PbOptimization ->
-                "PB optimization"
-
-            CplexLp ->
-                "CPLEX LP"
-
-            Z3log ->
-                "Z3 log"
+    Json.Encode.string <| stringOfFormat format
 
 
 type alias Display =
@@ -176,20 +218,10 @@ createJson params =
         ]
 
 
-formatOfString : String -> Msg
-formatOfString str =
-    case str of
-        "smtlib2" ->
-            Format Smtlib2
-
-        _ ->
-            undefined ()
-
-
 createUi : Params -> Html Msg
 createUi params =
     div [ class "form-group" ] <|
-        [ createSelectLine [ "smtlib2", "datalog" ] formatOfString
+        [ createSelectLine (List.map stringOfFormat formats) (\str -> Format <| unwrap <| formatOfString str)
         , createCheckboxLine DisplayGlobalParams "display global parameters"
         , createCheckboxLine DisplayGlobalParamDescs "display global parameter descriptions"
         , createCheckboxLine DisplayStatistics "display statistics"

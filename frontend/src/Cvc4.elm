@@ -268,10 +268,20 @@ createJson params =
 
 createUi : Params -> Html Msg
 createUi params =
-    div [ class "form-group" ]
-        [ createSelectLine (List.map stringOfLang langs) (\str -> Lang <| unwrap <| langOfString str)
-        , createSelectLine (List.map stringOfOutputLang outputLangs) (\str -> OutputLang <| unwrap <| outputLangOfString str)
+    div [ class "form-group" ] <|
+        [ createSelectLine (List.map stringOfLang langs) (\str -> Lang <| unwrap <| langOfString str) "lang"
+        , createSelectLine (List.map stringOfOutputLang outputLangs) (\str -> OutputLang <| unwrap <| outputLangOfString str) "output lang"
+        , createNumberLine Verbosity "verbosity"
+        , createCheckboxLine CpuTime "cpu time"
+        , createCheckboxLine Incremental "incremental"
+        , createCheckboxLine ArithNoPartialFun "arith no partial fun"
         ]
+            ++ createMaybeIntInput Seed "seed" params.seed
+            ++ createMaybeIntInput ResourceLimitPer "resource limit per" params.resourceLimitPer
+            ++ createMaybeIntInput ResourceLimit "resource limit" params.resourceLimit
+            ++ createMaybeIntInput TimeLimitPer "time limit per" params.timeLimitPer
+            ++ createMaybeIntInput TimeLimit "time limit" params.timeLimit
+            ++ createMaybeIntInput ApproxBranchDepth "approx branch depth" params.approxBranchDepth
 
 
 default : Params

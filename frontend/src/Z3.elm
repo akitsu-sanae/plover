@@ -221,7 +221,7 @@ createJson params =
 createUi : Params -> Html Msg
 createUi params =
     div [ class "form-group" ] <|
-        [ createSelectLine (List.map stringOfFormat formats) (\str -> Format <| unwrap <| formatOfString str)
+        [ createSelectLine (List.map stringOfFormat formats) (\str -> Format <| unwrap <| formatOfString str) "format"
         , createCheckboxLine DisplayGlobalParams "display global parameters"
         , createCheckboxLine DisplayGlobalParamDescs "display global parameter descriptions"
         , createCheckboxLine DisplayStatistics "display statistics"

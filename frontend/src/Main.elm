@@ -163,7 +163,7 @@ view model =
 createParamsUi : Params -> Html Msg
 createParamsUi params =
     ul [ class "menu" ]
-        [ li [ class "menu-item" ] [ createSelectLine [ "z3", "cvc4" ] Solver ]
+        [ li [ class "menu-item" ] [ createSelectLine [ "z3", "cvc4" ] Solver "solver" ]
         , li [ class "divider" ] []
         , li [ class "menu-item" ] [ createSolverParamsUi params ]
         ]

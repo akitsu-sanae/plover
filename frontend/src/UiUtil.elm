@@ -1,4 +1,4 @@
-module UiUtil exposing (createCheckboxLine, createMaybeIntInput, createSelectLine, onChange)
+module UiUtil exposing (createCheckboxLine, createMaybeIntInput, createNumberLine, createSelectLine, onChange)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -12,15 +12,40 @@ onChange handler =
     on "change" (Json.map handler Events.targetValue)
 
 
-createSelectLine : List String -> (String -> a) -> Html a
-createSelectLine options msg =
-    select [ class "form-select", onChange msg ]
-        (List.map
-            (\opt ->
-                option [ value opt ] [ text opt ]
+createSelectLine : List String -> (String -> a) -> String -> Html a
+createSelectLine options msg desc =
+    label []
+        [ text desc
+        , select [ class "form-select", onChange msg ]
+            (List.map
+                (\opt ->
+                    option [ value opt ] [ text opt ]
+                )
+                options
             )
-            options
-        )
+        ]
+
+
+createNumberLine : (Int -> a) -> String -> Html a
+createNumberLine msg desc =
+    label []
+        [ text desc
+        , input
+            [ class "form-input input-sm"
+            , type_ "number"
+            , Html.Attributes.min "0"
+            , onInput
+                (\str ->
+                    case String.toInt str of
+                        Nothing ->
+                            undefined ()
+
+                        Just n ->
+                            msg n
+                )
+            ]
+            []
+        ]
 
 
 createCheckboxLine : a -> String -> Html a

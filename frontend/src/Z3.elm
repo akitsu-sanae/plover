@@ -1,4 +1,4 @@
-module Z3 exposing (Display, Format(..), Limit, Msg(..), Params, createJson, createUi, default, update)
+module Z3 exposing (Display, Format(..), Limit, Params, UpdateParamMsg(..), createJson, createUi, default, update)
 
 import Dict exposing (Dict)
 import Html exposing (Html, br, div, input, option, select, text)
@@ -111,7 +111,7 @@ type alias Params =
     }
 
 
-type Msg
+type UpdateParamMsg
     = Format Format
     | DisplayGlobalParams
     | DisplayGlobalParamDescs
@@ -122,7 +122,7 @@ type Msg
     | Memory (Maybe Int)
 
 
-update : Msg -> Params -> Params
+update : UpdateParamMsg -> Params -> Params
 update msg params =
     case msg of
         Format format ->
@@ -218,7 +218,7 @@ createJson params =
         ]
 
 
-createUi : Params -> Html Msg
+createUi : Params -> Html UpdateParamMsg
 createUi params =
     div [ class "form-group" ] <|
         [ createSelectLine (List.map stringOfFormat formats) (\str -> Format <| unwrap <| formatOfString str) "format"

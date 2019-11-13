@@ -27,8 +27,8 @@ main =
 
 
 type Params
-    = Z3 Z3.Params
-    | Cvc4 Cvc4.Params
+    = Z3Params Z3.Params
+    | Cvc4Params Cvc4.Params
 
 
 type alias Model =
@@ -41,51 +41,81 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Z3 Z3.default) "" Nothing False, Cmd.none )
+    ( { params = Z3Params Z3.default
+      , input = ""
+      , output = Nothing
+      , isLoading = False
+      }
+    , Cmd.none
+    )
 
 
 
 -- UPDATE
 
 
+type Solver
+    = Z3Solver
+    | Cvc4Solver
+
+
+solverOfStr : String -> Maybe Solver
+solverOfStr str =
+    case String.toLower str of
+        "z3" ->
+            Just Z3Solver
+
+        "cvc4" ->
+            Just Cvc4Solver
+
+        _ ->
+            Nothing
+
+
+type UpdateParamMsg
+    = UpdateZ3Param Z3.UpdateParamMsg
+    | UpdateCvc4Param Cvc4.UpdateParamMsg
+
+
 type Msg
-    = Solver String
-    | Z3Msg Z3.Msg
-    | Cvc4Msg Cvc4.Msg
+    = ChangeSolver Solver
+    | UpdateParam UpdateParamMsg
     | Input String
     | Verify
-    | GotResult (Result Http.Error String)
+    | Output (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Solver solver ->
-            case solver of
-                "z3" ->
-                    ( { model | params = Z3 Z3.default }, Cmd.none )
+        ChangeSolver solver ->
+            ( { model
+                | params =
+                    case solver of
+                        Z3Solver ->
+                            Z3Params Z3.default
 
-                "cvc4" ->
-                    ( { model | params = Cvc4 Cvc4.default }, Cmd.none )
+                        Cvc4Solver ->
+                            Cvc4Params Cvc4.default
+              }
+            , Cmd.none
+            )
 
-                _ ->
-                    undefined ()
+        UpdateParam paramMsg ->
+            ( { model
+                | params =
+                    case ( model.params, paramMsg ) of
+                        ( Z3Params params, UpdateZ3Param msg_ ) ->
+                            Z3Params <| Z3.update msg_ params
 
-        Z3Msg z3msg ->
-            case model.params of
-                Z3 z3params ->
-                    ( { model | params = Z3 <| Z3.update z3msg z3params }, Cmd.none )
+                        ( Cvc4Params params, UpdateCvc4Param msg_ ) ->
+                            Cvc4Params <| Cvc4.update msg_ params
 
-                Cvc4 _ ->
-                    undefined ()
-
-        Cvc4Msg cvc4msg ->
-            case model.params of
-                Cvc4 cvc4params ->
-                    ( { model | params = Cvc4 <| Cvc4.update cvc4msg cvc4params }, Cmd.none )
-
-                Z3 _ ->
-                    undefined ()
+                        ( _, _ ) ->
+                            undefined ()
+              }
+            , Cmd.none
+            )
 
         Input src ->
             ( { model | input = src }, Cmd.none )
@@ -93,13 +123,19 @@ update msg model =
         Verify ->
             ( { model | isLoading = True }, getVerificationResult model )
 
-        GotResult result ->
-            case result of
-                Ok json ->
-                    ( { model | output = Just json, isLoading = False }, Cmd.none )
+        Output output ->
+            ( { model
+                | isLoading = False
+                , output =
+                    case output of
+                        Ok output_ ->
+                            Just output_
 
-                Err err ->
-                    ( { model | output = Just <| toString err, isLoading = False }, Cmd.none )
+                        Err err ->
+                            Just <| toString err
+              }
+            , Cmd.none
+            )
 
 
 
@@ -113,11 +149,11 @@ createVerificationRequestBody model =
             [ ( "src", Json.Encode.string model.input )
             , ( "argments"
               , case model.params of
-                    Z3 z3params ->
-                        Z3.createJson z3params
+                    Z3Params params ->
+                        Z3.createJson params
 
-                    Cvc4 cvc4params ->
-                        Cvc4.createJson cvc4params
+                    Cvc4Params params ->
+                        Cvc4.createJson params
               )
             ]
 
@@ -127,7 +163,7 @@ getVerificationResult model =
     Http.post
         { url = "https://qtafsl7jpf.execute-api.us-east-2.amazonaws.com/ProductionStage/verify"
         , body = createVerificationRequestBody model
-        , expect = Http.expectJson GotResult resultDecoder
+        , expect = Http.expectJson Output resultDecoder
         }
 
 
@@ -163,7 +199,13 @@ view model =
 createParamsUi : Params -> Html Msg
 createParamsUi params =
     ul [ class "menu" ]
-        [ li [ class "menu-item" ] [ createSelectLine [ "z3", "cvc4" ] Solver "solver" ]
+        [ li
+            [ class "menu-item" ]
+            [ createSelectLine
+                [ "z3", "cvc4" ]
+                (\str -> ChangeSolver <| unwrap <| solverOfStr str)
+                "solver"
+            ]
         , li [ class "divider" ] []
         , li [ class "menu-item" ] [ createSolverParamsUi params ]
         ]
@@ -202,8 +244,8 @@ createMainUi output isLoading =
 createSolverParamsUi : Params -> Html Msg
 createSolverParamsUi params =
     case params of
-        Z3 z3params ->
-            Html.map (\msg -> Z3Msg msg) <| Z3.createUi z3params
+        Z3Params params_ ->
+            Html.map (\msg -> UpdateParam <| UpdateZ3Param msg) <| Z3.createUi params_
 
-        Cvc4 cvc4params ->
-            Html.map (\msg -> Cvc4Msg msg) <| Cvc4.createUi cvc4params
+        Cvc4Params params_ ->
+            Html.map (\msg -> UpdateParam <| UpdateCvc4Param msg) <| Cvc4.createUi params_

@@ -1,4 +1,4 @@
-module Cvc4 exposing (Lang(..), Msg(..), Params, createJson, createUi, default, update)
+module Cvc4 exposing (Lang(..), Params, UpdateParamMsg(..), createJson, createUi, default, update)
 
 import Dict exposing (Dict)
 import Html exposing (Html, br, div, input, option, select, text)
@@ -196,7 +196,7 @@ type alias Params =
     }
 
 
-type Msg
+type UpdateParamMsg
     = Lang Lang
     | OutputLang OutputLang
     | Verbosity Int
@@ -211,7 +211,7 @@ type Msg
     | ArithNoPartialFun
 
 
-update : Msg -> Params -> Params
+update : UpdateParamMsg -> Params -> Params
 update msg params =
     case msg of
         Lang lang ->
@@ -266,7 +266,7 @@ createJson params =
         ]
 
 
-createUi : Params -> Html Msg
+createUi : Params -> Html UpdateParamMsg
 createUi params =
     div [ class "form-group" ] <|
         [ createSelectLine (List.map stringOfLang langs) (\str -> Lang <| unwrap <| langOfString str) "lang"

@@ -2,7 +2,7 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Cvc4 exposing (..)
-import Html exposing (Html, aside, br, button, div, h1, header, label, li, option, select, text, textarea, ul)
+import Html exposing (Html, a, aside, br, button, div, h1, header, label, li, option, select, text, textarea, ul)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -48,6 +48,19 @@ init _ =
       }
     , Cmd.none
     )
+
+
+isActiveSolver : Solver -> Params -> Bool
+isActiveSolver solver params =
+    case ( params, solver ) of
+        ( Z3Params _, Z3Solver ) ->
+            True
+
+        ( Cvc4Params _, Cvc4Solver ) ->
+            True
+
+        _ ->
+            False
 
 
 
@@ -190,9 +203,30 @@ view model =
     div [ class "container" ]
         [ header [] [ h1 [] [ text "Plover" ] ]
         , div [ class "columns" ]
-            [ div [ class "column col-3" ] [ createParamsUi model.params ]
+            [ div [ class "column col-4-mr-auto" ] [ createParamsUi model.params ]
             , div [ class "column col-8" ] [ createMainUi model.output model.isLoading ]
             ]
+        ]
+
+
+createChangeSolverUi : Params -> Html Msg
+createChangeSolverUi params =
+    let
+        buttonClass solver =
+            class <|
+                if isActiveSolver solver params then
+                    "btn btn-primary"
+
+                else
+                    "btn"
+    in
+    div [ class "btn-group btn-group-block" ]
+        [ button
+            [ buttonClass Z3Solver, onClick <| ChangeSolver Z3Solver ]
+            [ a [ href "#" ] [ text "Z3" ] ]
+        , button
+            [ buttonClass Cvc4Solver, onClick <| ChangeSolver Cvc4Solver ]
+            [ a [ href "#" ] [ text "CVC4" ] ]
         ]
 
 
@@ -201,12 +235,7 @@ createParamsUi params =
     ul [ class "menu" ]
         [ li
             [ class "menu-item" ]
-            [ createSelectLine
-                [ "z3", "cvc4" ]
-                (\str -> ChangeSolver <| unwrap <| solverOfStr str)
-                "solver"
-            ]
-        , li [ class "divider" ] []
+            [ createChangeSolverUi params ]
         , li [ class "menu-item" ] [ createSolverParamsUi params ]
         ]
 

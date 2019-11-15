@@ -1,4 +1,4 @@
-module Util exposing (jsonOfMaybeInt, toString, undefined, unwrap)
+module Util exposing (jsonOfMaybeInt, nth, toString, undefined, unwrap)
 
 import Http
 import Json.Decode as Json
@@ -47,3 +47,16 @@ unwrap x =
 
         Just y ->
             y
+
+
+nth : List a -> Int -> Maybe a
+nth l n =
+    case ( l, n ) of
+        ( [], _ ) ->
+            Nothing
+
+        ( head :: _, 0 ) ->
+            Just head
+
+        ( _ :: tail, _ ) ->
+            nth tail (n - 1)

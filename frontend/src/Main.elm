@@ -31,10 +31,18 @@ type Params
     | Cvc4Params Cvc4.Params
 
 
+type alias History =
+    { isSuccess : Bool, content : String }
+
+
+type alias QueryResult =
+    { histories : List History, focused : Int }
+
+
 type alias Model =
     { params : Params
     , input : String
-    , output : Maybe String
+    , result : QueryResult
     , isLoading : Bool
     }
 
@@ -43,7 +51,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { params = Z3Params Z3.default
       , input = ""
-      , output = Nothing
+      , result = { histories = [], focused = 0 }
       , isLoading = False
       }
     , Cmd.none
@@ -96,6 +104,7 @@ type Msg
     | Input String
     | Verify
     | Output (Result Http.Error String)
+    | SelectHistory Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -139,16 +148,29 @@ update msg model =
         Output output ->
             ( { model
                 | isLoading = False
-                , output =
-                    case output of
-                        Ok output_ ->
-                            Just output_
+                , result =
+                    let
+                        new_history =
+                            case output of
+                                Ok content ->
+                                    { isSuccess = True, content = content }
 
-                        Err err ->
-                            Just <| toString err
+                                Err err ->
+                                    { isSuccess = False, content = toString err }
+                    in
+                    { histories = new_history :: model.result.histories
+                    , focused = 0
+                    }
               }
             , Cmd.none
             )
+
+        SelectHistory index ->
+            let
+                old_result =
+                    model.result
+            in
+            ( { model | result = { old_result | focused = index } }, Cmd.none )
 
 
 
@@ -203,14 +225,14 @@ view model =
     div [ class "container" ]
         [ header [] [ h1 [] [ text "Plover" ] ]
         , div [ class "columns" ]
-            [ div [ class "column col-4-mr-auto" ] [ createParamsUi model.params ]
-            , div [ class "column col-8" ] [ createMainUi model.output model.isLoading ]
+            [ div [ class "column col-4-mr-auto" ] [ paramsView model.params ]
+            , div [ class "column col-8" ] [ mainView model ]
             ]
         ]
 
 
-createChangeSolverUi : Params -> Html Msg
-createChangeSolverUi params =
+selectSolverView : Params -> Html Msg
+selectSolverView params =
     let
         buttonClass solver =
             class <|
@@ -230,51 +252,74 @@ createChangeSolverUi params =
         ]
 
 
-createParamsUi : Params -> Html Msg
-createParamsUi params =
+paramsView : Params -> Html Msg
+paramsView params =
     ul [ class "menu" ]
         [ li
             [ class "menu-item" ]
-            [ createChangeSolverUi params ]
-        , li [ class "menu-item" ] [ createSolverParamsUi params ]
+            [ selectSolverView params ]
+        , li [ class "menu-item" ]
+            [ case params of
+                Z3Params params_ ->
+                    Html.map (\msg -> UpdateParam <| UpdateZ3Param msg) <| Z3.createUi params_
+
+                Cvc4Params params_ ->
+                    Html.map (\msg -> UpdateParam <| UpdateCvc4Param msg) <| Cvc4.createUi params_
+            ]
         ]
 
 
-createMainUi : Maybe String -> Bool -> Html Msg
-createMainUi output isLoading =
+mainView : Model -> Html Msg
+mainView model =
     div [ class "form-group" ] <|
         [ label [ class "form-label", for "input-area" ] [ text "Query to Solver:" ]
-        , textarea [ class "input-area form-input", onInput Input ] []
-        , br [] []
+        , textarea [ class "input-area form-input", rows 12, onInput Input ] []
         , button
-            [ class
-                (if isLoading then
+            [ class <|
+                if model.isLoading then
                     "btn loading"
 
-                 else
+                else
                     "btn"
-                )
             , onClick Verify
             ]
             [ text "verify!" ]
+        , resultView model.result
         ]
-            ++ (case output of
-                    Nothing ->
-                        []
-
-                    Just out ->
-                        [ br [] []
-                        , label [ class "form-label", for "output-area" ] [ text "Response from Solver:" ]
-                        , textarea [ class "output-area form-input" ] [ text out ]
-                        ]
-               )
 
 
-createSolverParamsUi : Params -> Html Msg
-createSolverParamsUi params =
-    case params of
-        Z3Params params_ ->
-            Html.map (\msg -> UpdateParam <| UpdateZ3Param msg) <| Z3.createUi params_
+resultView : QueryResult -> Html Msg
+resultView result =
+    case Util.nth result.histories result.focused of
+        Nothing ->
+            div [] []
 
-        Cvc4Params params_ ->
-            Html.map (\msg -> UpdateParam <| UpdateCvc4Param msg) <| Cvc4.createUi params_
+        Just history ->
+            div []
+                [ ul [ class "tab tab-block" ] <|
+                    List.indexedMap
+                        (\index _ ->
+                            li
+                                [ class <|
+                                    if result.focused == index then
+                                        "tab-item active"
+
+                                    else
+                                        "tab-item"
+                                , onClick (SelectHistory index)
+                                ]
+                                [ a
+                                    [ href "#"
+                                    , class <|
+                                        if result.focused == index then
+                                            "active"
+
+                                        else
+                                            ""
+                                    ]
+                                    [ text <| "#" ++ String.fromInt index ]
+                                ]
+                        )
+                        result.histories
+                , text history.content
+                ]

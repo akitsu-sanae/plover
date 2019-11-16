@@ -143,7 +143,7 @@ update msg model =
             ( { model | input = src }, Cmd.none )
 
         Verify ->
-            ( { model | isLoading = True }, getVerificationResult model )
+            ( { model | isLoading = True }, verificationCommand model )
 
         Output output ->
             ( { model
@@ -177,8 +177,8 @@ update msg model =
 -- HTTP
 
 
-createVerificationRequestBody : Model -> Http.Body
-createVerificationRequestBody model =
+verificationRequestBody : Model -> Http.Body
+verificationRequestBody model =
     Http.jsonBody <|
         Json.Encode.object
             [ ( "src", Json.Encode.string model.input )
@@ -193,11 +193,11 @@ createVerificationRequestBody model =
             ]
 
 
-getVerificationResult : Model -> Cmd Msg
-getVerificationResult model =
+verificationCommand : Model -> Cmd Msg
+verificationCommand model =
     Http.post
         { url = "https://qtafsl7jpf.execute-api.us-east-2.amazonaws.com/ProductionStage/verify"
-        , body = createVerificationRequestBody model
+        , body = verificationRequestBody model
         , expect = Http.expectJson Output resultDecoder
         }
 

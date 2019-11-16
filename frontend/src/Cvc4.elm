@@ -257,10 +257,11 @@ createJson params =
         [ ( "cvc4"
           , Json.Encode.object
                 [ ( "lang", jsonOfLang params.lang )
-                , ( "output lang", jsonOfOutputLang params.outputLang )
+                , ( "output-lang", jsonOfOutputLang params.outputLang )
                 , ( "verbosity", Json.Encode.int params.verbosity )
-                , ( "cpu time", Json.Encode.bool params.cpuTime )
+                , ( "cpu-time", Json.Encode.bool params.cpuTime )
                 , ( "incremental", Json.Encode.bool params.incremental )
+                , ( "arith-no-partial-fun", Json.Encode.bool params.arithNoPartialFun )
                 ]
           )
         ]

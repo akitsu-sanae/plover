@@ -184,15 +184,18 @@ type alias Params =
     { lang : Lang
     , outputLang : OutputLang
     , verbosity : Int
+    , stats : Bool
     , seed : Maybe Int
+    , strictParsing : Bool
     , cpuTime : Bool
+    , hardLimit : Bool
     , incremental : Bool
+    , produceAssertions : Bool
+    , produceModels : Bool
     , resourceLimitPer : Maybe Int
     , resourceLimit : Maybe Int
     , timeLimitPer : Maybe Int
     , timeLimit : Maybe Int
-    , approxBranchDepth : Maybe Int
-    , arithNoPartialFun : Bool
     }
 
 
@@ -200,15 +203,18 @@ type UpdateParamMsg
     = Lang Lang
     | OutputLang OutputLang
     | Verbosity Int
+    | Stats
     | Seed (Maybe Int)
+    | StrictParsing
     | CpuTime
+    | HardLimit
     | Incremental
+    | ProduceAssertions
+    | ProduceModels
     | ResourceLimitPer (Maybe Int)
     | ResourceLimit (Maybe Int)
     | TimeLimitPer (Maybe Int)
     | TimeLimit (Maybe Int)
-    | ApproxBranchDepth (Maybe Int)
-    | ArithNoPartialFun
 
 
 update : UpdateParamMsg -> Params -> Params
@@ -223,14 +229,29 @@ update msg params =
         Verbosity n ->
             { params | verbosity = n }
 
+        Stats ->
+            { params | stats = not params.stats }
+
         Seed n ->
             { params | seed = n }
+
+        StrictParsing ->
+            { params | strictParsing = not params.strictParsing }
 
         CpuTime ->
             { params | cpuTime = not params.cpuTime }
 
+        HardLimit ->
+            { params | cpuTime = not params.hardLimit }
+
         Incremental ->
             { params | incremental = not params.incremental }
+
+        ProduceAssertions ->
+            { params | produceAssertions = not params.produceAssertions }
+
+        ProduceModels ->
+            { params | produceModels = not params.produceModels }
 
         ResourceLimitPer limit ->
             { params | resourceLimitPer = limit }
@@ -244,25 +265,40 @@ update msg params =
         TimeLimit limit ->
             { params | timeLimit = limit }
 
-        ApproxBranchDepth depth ->
-            { params | approxBranchDepth = depth }
 
-        ArithNoPartialFun ->
-            { params | arithNoPartialFun = not params.arithNoPartialFun }
+jsonFromMaybeInt : String -> Maybe Int -> List ( String, Json.Encode.Value )
+jsonFromMaybeInt label x =
+    case x of
+        Just n ->
+            [ ( label, Json.Encode.int n ) ]
+
+        Nothing ->
+            []
 
 
 createJson : Params -> Json.Encode.Value
 createJson params =
     Json.Encode.object
         [ ( "cvc4"
-          , Json.Encode.object
+          , Json.Encode.object <|
                 [ ( "lang", jsonOfLang params.lang )
                 , ( "output-lang", jsonOfOutputLang params.outputLang )
                 , ( "verbosity", Json.Encode.int params.verbosity )
+                , ( "stats", Json.Encode.bool params.stats )
+                , ( "strict-parsing", Json.Encode.bool params.strictParsing )
                 , ( "cpu-time", Json.Encode.bool params.cpuTime )
+                , ( "hard-limit", Json.Encode.bool params.hardLimit )
                 , ( "incremental", Json.Encode.bool params.incremental )
-                , ( "arith-no-partial-fun", Json.Encode.bool params.arithNoPartialFun )
+                , ( "produce-assertions", Json.Encode.bool params.produceAssertions )
+                , ( "produce-models", Json.Encode.bool params.produceModels )
                 ]
+                    ++ jsonFromMaybeInt "seed" params.seed
+                    ++ jsonFromMaybeInt "rlimit-per" params.resourceLimitPer
+                    ++ jsonFromMaybeInt "rlimit" params.resourceLimit
+                    ++ jsonFromMaybeInt "tlimit-per" params.timeLimitPer
+                    ++ jsonFromMaybeInt "tlimit" params.timeLimit
+                    ++ [ ( "others", Json.Encode.list Json.Encode.int [] ) ]
+            -- TODO
           )
         ]
 
@@ -273,30 +309,36 @@ createUi params =
         [ createSelectLine (List.map stringOfLang langs) (\str -> Lang <| unwrap <| langOfString str) "lang"
         , createSelectLine (List.map stringOfOutputLang outputLangs) (\str -> OutputLang <| unwrap <| outputLangOfString str) "output lang"
         , createNumberLine Verbosity "verbosity"
+        , createCheckboxLine Stats "stats"
+        , createCheckboxLine StrictParsing "strict parsing"
         , createCheckboxLine CpuTime "cpu time"
+        , createCheckboxLine HardLimit "hard limit"
         , createCheckboxLine Incremental "incremental"
-        , createCheckboxLine ArithNoPartialFun "arith no partial fun"
+        , createCheckboxLine ProduceAssertions "produce assertions"
+        , createCheckboxLine ProduceModels "produce models"
         ]
             ++ createMaybeIntInput Seed "seed" params.seed
             ++ createMaybeIntInput ResourceLimitPer "resource limit per" params.resourceLimitPer
             ++ createMaybeIntInput ResourceLimit "resource limit" params.resourceLimit
             ++ createMaybeIntInput TimeLimitPer "time limit per" params.timeLimitPer
             ++ createMaybeIntInput TimeLimit "time limit" params.timeLimit
-            ++ createMaybeIntInput ApproxBranchDepth "approx branch depth" params.approxBranchDepth
 
 
 default : Params
 default =
-    Params
-        Auto
-        OAuto
-        0
-        Nothing
-        False
-        False
-        Nothing
-        Nothing
-        Nothing
-        Nothing
-        Nothing
-        False
+    { lang = Auto
+    , outputLang = OAuto
+    , verbosity = 0
+    , stats = False
+    , seed = Nothing
+    , strictParsing = False
+    , cpuTime = False
+    , hardLimit = False
+    , incremental = False
+    , produceAssertions = False
+    , produceModels = False
+    , resourceLimitPer = Nothing
+    , resourceLimit = Nothing
+    , timeLimitPer = Nothing
+    , timeLimit = Nothing
+    }

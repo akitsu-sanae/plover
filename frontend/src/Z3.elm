@@ -198,8 +198,8 @@ createJson params =
                 [ ( "format", jsonOfFormat params.format )
                 , ( "display"
                   , Json.Encode.object
-                        [ ( "global_parameters", Json.Encode.bool params.display.globalParams )
-                        , ( "global_parameter_descriptions", Json.Encode.bool params.display.globalParamDescs )
+                        [ ( "global-parameters", Json.Encode.bool params.display.globalParams )
+                        , ( "global-parameter-descriptions", Json.Encode.bool params.display.globalParamDescs )
                         , ( "statistics", Json.Encode.bool params.display.statistics )
                         , ( "warnings", Json.Encode.bool params.display.warnings )
                         ]
@@ -211,8 +211,9 @@ createJson params =
                             ++ jsonOfMaybeInt "memory" params.limit.memory
                         )
                   )
-                , ( "global_parameters", Json.Encode.object (Dict.values <| Dict.map (\name value -> ( name, Json.Encode.string value )) params.globalParams) )
-                , ( "module_parameters", Json.Encode.object (Dict.values <| Dict.map (\( moduleName, paramName ) value -> ( moduleName ++ "." ++ paramName, Json.Encode.string value )) params.moduleParams) )
+                , ( "global-parameters", Json.Encode.object (Dict.values <| Dict.map (\name value -> ( name, Json.Encode.string value )) params.globalParams) )
+                , ( "module-parameters", Json.Encode.object (Dict.values <| Dict.map (\( moduleName, paramName ) value -> ( moduleName ++ "." ++ paramName, Json.Encode.string value )) params.moduleParams) )
+                , ( "others", Json.Encode.list Json.Encode.string [] ) -- TODO
                 ]
           )
         ]

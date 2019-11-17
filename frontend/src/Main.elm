@@ -196,7 +196,7 @@ verificationRequestBody model =
 verificationCommand : Model -> Cmd Msg
 verificationCommand model =
     Http.post
-        { url = "https://qtafsl7jpf.execute-api.us-east-2.amazonaws.com/ProductionStage/verify"
+        { url = "https://aa4fhzgok5.execute-api.us-east-2.amazonaws.com/product/verify"
         , body = verificationRequestBody model
         , expect = Http.expectJson Output resultDecoder
         }

@@ -20,9 +20,9 @@ enum Format {
 
 #[derive(Deserialize, Clone)]
 struct Display {
-    #[serde(rename = "global_parameters")]
+    #[serde(rename = "global-parameters")]
     global_parameters: bool,
-    #[serde(rename = "global_parameter_descriptions")]
+    #[serde(rename = "global-parameter-descriptions")]
     global_parameter_descriptions: bool,
     #[serde(rename = "statistics")]
     statistics: bool,
@@ -34,9 +34,9 @@ struct Display {
 struct Limit {
     #[serde(rename = "timeout")]
     timeout: Option<i32>,
-    #[serde(rename = "soft_timeout")]
+    #[serde(rename = "soft-timeout")]
     soft_timeout: Option<i32>,
-    #[serde(rename = "memory_limit")]
+    #[serde(rename = "memory-limit")]
     memory: Option<i32>,
 }
 
@@ -51,14 +51,16 @@ pub struct Argments {
     #[serde(rename = "limit")]
     limit: Limit,
 
-    #[serde(rename = "global_parameters")]
+    #[serde(rename = "global-parameters")]
     global_parameters: HashMap<String, String>,
-    #[serde(rename = "module_parameters")]
+    #[serde(rename = "module-parameters")]
     module_parameters: HashMap<(String, String), String>,
+
+    others: Vec<String>,
 }
 
 impl Argments {
-    pub fn to_commandline(&self) -> Vec<String> {
+    pub fn to_commandline(mut self) -> Vec<String> {
         let mut result = vec![];
         match self.format {
             Format::Smtlib2 => result.push("-smt2".to_string()),
@@ -101,6 +103,9 @@ impl Argments {
         for (&(ref module_name, ref param_name), ref value) in self.module_parameters.iter() {
             result.push(format!("{}.{}={}", module_name, param_name, value));
         }
+
+        result.append(&mut self.others);
+
         result
     }
 }

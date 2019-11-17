@@ -63,42 +63,36 @@ pub enum OutputLang {
 
 #[derive(Deserialize, Clone)]
 pub struct Argments {
-    #[serde(rename = "lang")]
     lang: Lang,
-
     #[serde(rename = "output-lang")]
     output_lang: OutputLang,
 
-    #[serde(rename = "verbosity")]
-    verbosity: i32,
-
-    #[serde(rename = "seed")]
+    verbosity: i32, // --quiet/--verbose
+    stats: bool,
     seed: Option<i32>,
-
+    #[serde(rename = "strict-parsing")]
+    strict_parsing: bool,
     #[serde(rename = "cpu-time")]
     cpu_time: bool,
-
-    #[serde(rename = "incremental")]
+    #[serde(rename = "hard-limit")]
+    hard_limit: bool,
     incremental: bool,
+    #[serde(rename = "produce-assertions")]
+    produce_assertions: bool,
+    #[serde(rename = "produce-models")]
+    produce_models: bool,
+    #[serde(rename = "rlimit-per")]
+    rlimit_per: Option<i32>,
+    rlimit: Option<i32>,
+    #[serde(rename = "tlimit-per")]
+    tlimit_per: Option<i32>,
+    tlimit: Option<i32>,
 
-    #[serde(rename = "resource-limit-per")]
-    resource_limit_per: Option<i32>,
-    #[serde(rename = "resource-limit")]
-    resource_limit: Option<i32>,
-
-    #[serde(rename = "time-limit-per")]
-    time_limit_per: Option<i32>,
-    #[serde(rename = "time-limit")]
-    time_limit: Option<i32>,
-
-    #[serde(rename = "approx-branch-depth")]
-    approx_branch_depth: Option<i32>,
-    #[serde(rename = "arith-no-partial-fun")]
-    arith_no_partial_fun: bool,
+    others: Vec<String>,
 }
 
 impl Argments {
-    pub fn to_commandline(&self) -> Vec<String> {
+    pub fn to_commandline(mut self) -> Vec<String> {
         let mut result = vec![];
         result.push(format!(
             "--lang={}",
@@ -138,37 +132,68 @@ impl Argments {
             });
         }
 
+        result.push(if self.stats {
+            "--stats".to_string()
+        } else {
+            "--no-stats".to_string()
+        });
+
         if let Some(n) = self.seed {
             result.push(format!("--seed={}", n));
         }
 
-        if self.cpu_time {
-            result.push("--cpu-time".to_string());
-        }
-        if self.incremental {
-            result.push("--incremental".to_string());
-        }
+        result.push(if self.strict_parsing {
+            "--strict-parsing".to_string()
+        } else {
+            "--no-strict-parsing".to_string()
+        });
 
-        if let Some(n) = self.resource_limit_per {
+        result.push(if self.cpu_time {
+            "--cpu-time".to_string()
+        } else {
+            "--no-cpu-time".to_string()
+        });
+
+        result.push(if self.hard_limit {
+            "--hard-limit".to_string()
+        } else {
+            "--no-hard-limit".to_string()
+        });
+
+        result.push(if self.incremental {
+            "--incremental".to_string()
+        } else {
+            "--no-incremental".to_string()
+        });
+
+        result.push(if self.produce_assertions {
+            "--produce-assertions".to_string()
+        } else {
+            "--no-produce-assertions".to_string()
+        });
+
+        result.push(if self.produce_models {
+            "--produce-models".to_string()
+        } else {
+            "--no-produce-models".to_string()
+        });
+
+        if let Some(n) = self.rlimit_per {
             result.push(format!("--rlimit-per={}", n));
         }
-        if let Some(n) = self.resource_limit {
+        if let Some(n) = self.rlimit {
             result.push(format!("--rlimit={}", n));
         }
 
-        if let Some(n) = self.time_limit_per {
+        if let Some(n) = self.tlimit_per {
             result.push(format!("--tlimit-per={}", n));
         }
-        if let Some(n) = self.time_limit {
+        if let Some(n) = self.tlimit {
             result.push(format!("--tlimit={}", n));
         }
 
-        if let Some(n) = self.approx_branch_depth {
-            result.push(format!("--approx-branch-depth={}", n));
-        }
-        if self.arith_no_partial_fun {
-            result.push("--arith-no-partial-fun".to_string());
-        }
+        result.append(&mut self.others);
+
         result
     }
 }

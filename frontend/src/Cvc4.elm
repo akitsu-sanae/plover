@@ -196,6 +196,7 @@ type alias Params =
     , resourceLimit : Maybe Int
     , timeLimitPer : Maybe Int
     , timeLimit : Maybe Int
+    , others : List String
     }
 
 
@@ -341,4 +342,5 @@ default =
     , resourceLimit = Nothing
     , timeLimitPer = Nothing
     , timeLimit = Nothing
+    , others = []
     }

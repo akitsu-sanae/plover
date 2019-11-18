@@ -108,6 +108,7 @@ type alias Params =
     , limit : Limit
     , globalParams : Dict String String
     , moduleParams : Dict ( String, String ) String
+    , others : List String
     }
 
 
@@ -235,9 +236,19 @@ createUi params =
 
 default : Params
 default =
-    Params
-        Smtlib2
-        (Display False False False False)
-        (Limit Nothing Nothing Nothing)
-        (Dict.fromList [])
-        (Dict.fromList [])
+    { format = Smtlib2
+    , display =
+        { globalParams = False
+        , globalParamDescs = False
+        , statistics = False
+        , warnings = False
+        }
+    , limit =
+        { timeout = Nothing
+        , softTimeout = Nothing
+        , memory = Nothing
+        }
+    , globalParams = Dict.fromList []
+    , moduleParams = Dict.fromList []
+    , others = []
+    }

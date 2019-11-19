@@ -35,11 +35,53 @@ type Params
 
 
 type alias History =
-    { isSuccess : Bool, content : String }
+    { statusCode : Int, stdout : String, stderr : String }
 
 
 type alias QueryResult =
-    { histories : List History, focused : Int }
+    { histories : List (Result Http.Error History), focused : Int }
+
+
+isSuccess : Result Http.Error History -> Bool
+isSuccess x =
+    case x of
+        Ok history ->
+            history.statusCode == 0
+
+        Err _ ->
+            False
+
+
+contentOfHistoryResult : Result Http.Error History -> Html Msg
+contentOfHistoryResult x =
+    let
+        codeClass =
+            class <|
+                if isSuccess x then
+                    "text-light bg-dark"
+
+                else
+                    "text-error bg-dark"
+    in
+    case x of
+        Ok history ->
+            div [ class "columns" ]
+                [ div [ class "column col-12 text-light bg-dark" ] [ pre [] [ code [ codeClass ] [ text <| "status code: " ++ String.fromInt history.statusCode ] ] ]
+                , div [ class "column col-12" ] [ text "stdout:" ]
+                , div [ class "column col-12 text-light bg-dark" ] [ pre [] [ code [ codeClass ] [ text history.stdout ] ] ]
+                , div [ class "column col-12" ] [ text "stderr:" ]
+                , div [ class "column col-12 text-light bg-dark" ] [ pre [] [ code [ codeClass ] [ text history.stderr ] ] ]
+                ]
+
+        Err err ->
+            div [ class "columns" ]
+                [ div [ class "column col-12" ]
+                    [ pre []
+                        [ code [ codeClass ]
+                            [ text <| "Network Error : " ++ Util.stringOfHttpError err ]
+                        ]
+                    ]
+                ]
 
 
 type alias Model =
@@ -106,7 +148,7 @@ type Msg
     | UpdateParam UpdateParamMsg
     | Input String
     | Verify
-    | Output (Result Http.Error String)
+    | Output (Result Http.Error History)
     | SelectHistory Int
 
 
@@ -152,16 +194,7 @@ update msg model =
             ( { model
                 | isLoading = False
                 , result =
-                    let
-                        new_history =
-                            case output of
-                                Ok content ->
-                                    { isSuccess = True, content = content }
-
-                                Err err ->
-                                    { isSuccess = False, content = Util.stringOfHttpError err }
-                    in
-                    { histories = new_history :: model.result.histories
+                    { histories = output :: model.result.histories
                     , focused = 0
                     }
               }
@@ -205,9 +238,12 @@ verifyCmd model =
         }
 
 
-resultDecoder : Json.Decode.Decoder String
+resultDecoder : Json.Decode.Decoder History
 resultDecoder =
-    Json.Decode.field "stdout" Json.Decode.string
+    Json.Decode.map3 History
+        (Json.Decode.field "exit" Json.Decode.int)
+        (Json.Decode.field "stdout" Json.Decode.string)
+        (Json.Decode.field "stderr" Json.Decode.string)
 
 
 
@@ -324,21 +360,5 @@ resultView result =
                                 ]
                         )
                         result.histories
-                , div
-                    [ class "columns" ]
-                    [ div
-                        [ class "column col-12 bg-dark" ]
-                        [ pre []
-                            [ code
-                                [ class <|
-                                    if history.isSuccess then
-                                        "text-light bg-dark"
-
-                                    else
-                                        "text-error bg-dark"
-                                ]
-                                [ text history.content ]
-                            ]
-                        ]
-                    ]
+                , contentOfHistoryResult history
                 ]

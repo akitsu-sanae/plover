@@ -1,4 +1,4 @@
-module ViewUtil exposing (checkboxColumn, checkboxNumberColumn, inputNumberColumn, onChange, selectColumn)
+module ViewUtil exposing (checkboxColumn, checkboxNumberColumn, inputNumberColumn, onChange, registerParamsColumn, selectColumn)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -98,3 +98,37 @@ checkboxNumberColumn msg desc param =
             ]
             []
         ]
+
+
+registerParamsColumn : (String -> msg) -> (Int -> msg) -> (String -> msg) -> String -> { options : List String, currentInput : String } -> Html msg
+registerParamsColumn addHandler removeHandler inputtingHandler label formData =
+    let
+        registerInput =
+            [ div [ class "column col-12 input-group" ]
+                [ div [ class "columns" ]
+                    [ input [ class "form-input input-sm", type_ "text", onInput inputtingHandler ] []
+                    , button [ class "btn btn-sm btn-primary", onClick (addHandler formData.currentInput) ] [ text "add" ]
+                    ]
+                ]
+            ]
+
+        ( options, _ ) =
+            List.foldl
+                (\str ( list_, n ) ->
+                    ( div
+                        [ class "column col-12" ]
+                        [ div
+                            [ class "columns" ]
+                            [ div [ class "col-mr-auto" ] [ span [ class "label label-sm" ] [ text str ] ]
+                            , div [ class "col-2" ] [ button [ class "btn btn-sm", onClick (removeHandler n) ] [ text "×" ] ]
+                            ]
+                        ]
+                        :: list_
+                    , n + 1
+                    )
+                )
+                ( registerInput, 0 )
+                formData.options
+    in
+    div [ class "column col-12 input-group" ]
+        [ div [ class "columns" ] <| text label :: options ]

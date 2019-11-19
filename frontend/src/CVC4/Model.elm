@@ -191,7 +191,7 @@ type alias Params =
     , resourceLimit : Maybe Int
     , timeLimitPer : Maybe Int
     , timeLimit : Maybe Int
-    , others : List String
+    , others : { currentInput : String, options : List String }
     }
 
 
@@ -212,7 +212,10 @@ default =
     , resourceLimit = Nothing
     , timeLimitPer = Nothing
     , timeLimit = Nothing
-    , others = []
+    , others =
+        { currentInput = ""
+        , options = []
+        }
     }
 
 
@@ -231,7 +234,7 @@ jsonOfParams params =
                 , ( "incremental", Json.Encode.bool params.incremental )
                 , ( "produce-assertions", Json.Encode.bool params.produceAssertions )
                 , ( "produce-models", Json.Encode.bool params.produceModels )
-                , ( "others", Json.Encode.list Json.Encode.int [] ) -- TODO
+                , ( "others", Json.Encode.list Json.Encode.string params.others.options )
                 ]
                     ++ Util.zip [ "seed", "rlimit-per", "rlimit", "tlimit-per", "tlimit" ]
                         (List.filterMap (Maybe.map (\x -> Json.Encode.string <| String.fromInt x))

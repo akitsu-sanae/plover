@@ -1,6 +1,7 @@
 module CVC4.Update exposing (ParamMsg(..), update)
 
 import CVC4.Model as Model
+import Util
 
 
 type ParamMsg
@@ -19,6 +20,9 @@ type ParamMsg
     | ResourceLimit (Maybe Int)
     | TimeLimitPer (Maybe Int)
     | TimeLimit (Maybe Int)
+    | AddOption String
+    | RemoveOption Int
+    | InputtingOption String
 
 
 update : ParamMsg -> Model.Params -> Model.Params
@@ -68,3 +72,33 @@ update msg params =
 
         TimeLimit limit ->
             { params | timeLimit = limit }
+
+        AddOption str ->
+            let
+                oldOthers =
+                    params.others
+
+                newOthers =
+                    { oldOthers | options = str :: oldOthers.options }
+            in
+            { params | others = newOthers }
+
+        RemoveOption n ->
+            let
+                oldOthers =
+                    params.others
+
+                newOthers =
+                    { oldOthers | options = Util.remove oldOthers.options n }
+            in
+            { params | others = newOthers }
+
+        InputtingOption str ->
+            let
+                oldOthers =
+                    params.others
+
+                newOthers =
+                    { oldOthers | currentInput = str }
+            in
+            { params | others = newOthers }

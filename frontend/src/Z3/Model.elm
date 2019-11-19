@@ -99,7 +99,7 @@ type alias Params =
     , limit : Limit
     , globalParams : Dict String String
     , moduleParams : Dict ( String, String ) String
-    , others : List String
+    , others : { currentInput : String, options : List String }
     }
 
 
@@ -119,7 +119,10 @@ default =
         }
     , globalParams = Dict.fromList []
     , moduleParams = Dict.fromList []
-    , others = []
+    , others =
+        { currentInput = ""
+        , options = []
+        }
     }
 
 
@@ -148,7 +151,7 @@ jsonOfParams params =
                   )
                 , ( "global-parameters", Json.Encode.object (Dict.values <| Dict.map (\name value -> ( name, Json.Encode.string value )) params.globalParams) )
                 , ( "module-parameters", Json.Encode.object (Dict.values <| Dict.map (\( moduleName, paramName ) value -> ( moduleName ++ "." ++ paramName, Json.Encode.string value )) params.moduleParams) )
-                , ( "others", Json.Encode.list Json.Encode.string [] ) -- TODO
+                , ( "others", Json.Encode.list Json.Encode.string params.others.options )
                 ]
           )
         ]

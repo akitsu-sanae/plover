@@ -27,4 +27,5 @@ view params =
         , ViewUtil.checkboxNumberColumn Update.ResourceLimit "resource limit" params.resourceLimit
         , ViewUtil.checkboxNumberColumn Update.TimeLimitPer "time limit per" params.timeLimitPer
         , ViewUtil.checkboxNumberColumn Update.TimeLimit "time limit" params.timeLimit
+        , ViewUtil.registerParamsColumn Update.AddOption Update.RemoveOption Update.InputtingOption "others:" params.others
         ]

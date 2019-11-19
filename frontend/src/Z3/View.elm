@@ -20,4 +20,5 @@ view params =
         , ViewUtil.checkboxNumberColumn Update.Timeout "timeout" params.limit.timeout
         , ViewUtil.checkboxNumberColumn Update.SoftTimeout "soft timeout" params.limit.softTimeout
         , ViewUtil.checkboxNumberColumn Update.Memory "memory" params.limit.memory
+        , ViewUtil.registerParamsColumn Update.AddOption Update.RemoveOption Update.InputtingOption "others:" params.others
         ]

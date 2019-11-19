@@ -1,4 +1,4 @@
-module Util exposing (id, nth, toString, undefined, unwrap, zip)
+module Util exposing (id, nth, remove, toString, undefined, unwrap, zip)
 
 import Http
 import Json.Decode as Json
@@ -65,3 +65,16 @@ nth l n =
 
         ( _ :: tail, _ ) ->
             nth tail (n - 1)
+
+
+remove : List a -> Int -> List a
+remove lst n =
+    case ( lst, n ) of
+        ( x :: xs, 0 ) ->
+            xs
+
+        ( x :: xs, m ) ->
+            x :: remove xs (m - 1)
+
+        ( [], _ ) ->
+            undefined ()

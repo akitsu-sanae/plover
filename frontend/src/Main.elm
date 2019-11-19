@@ -4,7 +4,7 @@ import Browser
 import CVC4.Model
 import CVC4.Update
 import CVC4.View
-import Html exposing (Html, a, aside, br, button, div, h1, header, label, li, option, select, text, textarea, ul)
+import Html exposing (Html, a, button, code, div, h1, header, label, li, pre, text, textarea, ul)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -324,5 +324,21 @@ resultView result =
                                 ]
                         )
                         result.histories
-                , text history.content
+                , div
+                    [ class "columns" ]
+                    [ div
+                        [ class "column col-12 bg-dark" ]
+                        [ pre []
+                            [ code
+                                [ class <|
+                                    if history.isSuccess then
+                                        "text-light bg-dark"
+
+                                    else
+                                        "text-error bg-dark"
+                                ]
+                                [ text history.content ]
+                            ]
+                        ]
+                    ]
                 ]

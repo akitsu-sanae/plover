@@ -1,4 +1,4 @@
-module Util exposing (jsonOfMaybeInt, nth, toString, undefined, unwrap)
+module Util exposing (id, nth, toString, undefined, unwrap, zip)
 
 import Http
 import Json.Decode as Json
@@ -29,14 +29,19 @@ toString err =
             "BadBody: " ++ body
 
 
-jsonOfMaybeInt : String -> Maybe Int -> List ( String, Json.Encode.Value )
-jsonOfMaybeInt str x =
-    case x of
-        Nothing ->
-            []
+id : a -> a
+id x =
+    x
 
-        Just n ->
-            [ ( str, Json.Encode.int n ) ]
+
+zip : List a -> List b -> List ( a, b )
+zip l r =
+    case ( l, r ) of
+        ( x :: xs, y :: ys ) ->
+            ( x, y ) :: zip xs ys
+
+        _ ->
+            []
 
 
 unwrap : Maybe a -> a

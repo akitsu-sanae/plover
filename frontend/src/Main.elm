@@ -1,16 +1,19 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Cvc4 exposing (..)
+import CVC4.Model
+import CVC4.Update
+import CVC4.View
 import Html exposing (Html, a, aside, br, button, div, h1, header, label, li, option, select, text, textarea, ul)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode exposing (Decoder, field, string)
 import Json.Encode
-import UiUtil exposing (..)
 import Util exposing (..)
-import Z3 exposing (..)
+import Z3.Model
+import Z3.Update
+import Z3.View
 
 
 main =
@@ -27,8 +30,8 @@ main =
 
 
 type Params
-    = Z3Params Z3.Params
-    | Cvc4Params Cvc4.Params
+    = Z3Params Z3.Model.Params
+    | Cvc4Params CVC4.Model.Params
 
 
 type alias History =
@@ -49,7 +52,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { params = Z3Params Z3.default
+    ( { params = Z3Params Z3.Model.default
       , input = ""
       , result = { histories = [], focused = 0 }
       , isLoading = False
@@ -94,8 +97,8 @@ solverOfStr str =
 
 
 type UpdateParamMsg
-    = UpdateZ3Param Z3.UpdateParamMsg
-    | UpdateCvc4Param Cvc4.UpdateParamMsg
+    = UpdateZ3Param Z3.Update.ParamMsg
+    | UpdateCvc4Param CVC4.Update.ParamMsg
 
 
 type Msg
@@ -115,10 +118,10 @@ update msg model =
                 | params =
                     case solver of
                         Z3Solver ->
-                            Z3Params Z3.default
+                            Z3Params Z3.Model.default
 
                         Cvc4Solver ->
-                            Cvc4Params Cvc4.default
+                            Cvc4Params CVC4.Model.default
               }
             , Cmd.none
             )
@@ -128,10 +131,10 @@ update msg model =
                 | params =
                     case ( model.params, paramMsg ) of
                         ( Z3Params params, UpdateZ3Param msg_ ) ->
-                            Z3Params <| Z3.update msg_ params
+                            Z3Params <| Z3.Update.update msg_ params
 
                         ( Cvc4Params params, UpdateCvc4Param msg_ ) ->
-                            Cvc4Params <| Cvc4.update msg_ params
+                            Cvc4Params <| CVC4.Update.update msg_ params
 
                         ( _, _ ) ->
                             undefined ()
@@ -185,10 +188,10 @@ verificationRequestBody model =
             , ( "argments"
               , case model.params of
                     Z3Params params ->
-                        Z3.createJson params
+                        Z3.Model.jsonOfParams params
 
                     Cvc4Params params ->
-                        Cvc4.createJson params
+                        CVC4.Model.jsonOfParams params
               )
             ]
 
@@ -261,10 +264,10 @@ paramsView params =
         , li [ class "menu-item" ]
             [ case params of
                 Z3Params params_ ->
-                    Html.map (\msg -> UpdateParam <| UpdateZ3Param msg) <| Z3.createUi params_
+                    Html.map (\msg -> UpdateParam <| UpdateZ3Param msg) <| Z3.View.view params_
 
                 Cvc4Params params_ ->
-                    Html.map (\msg -> UpdateParam <| UpdateCvc4Param msg) <| Cvc4.createUi params_
+                    Html.map (\msg -> UpdateParam <| UpdateCvc4Param msg) <| CVC4.View.view params_
             ]
         ]
 

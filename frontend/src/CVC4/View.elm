@@ -2,9 +2,8 @@ module CVC4.View exposing (view)
 
 import CVC4.Model as Model
 import CVC4.Update as Update
-import Html exposing (Html, br, div, input, option, select, text)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, div)
+import Html.Attributes exposing (class)
 import Util
 import ViewUtil
 

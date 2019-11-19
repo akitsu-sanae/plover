@@ -3,13 +3,13 @@ module ViewUtil exposing (checkboxColumn, checkboxNumberColumn, inputNumberColum
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events as Events exposing (..)
-import Json.Decode as Json
+import Json.Decode
 import Util exposing (undefined)
 
 
 onChange : (String -> msg) -> Attribute msg
 onChange handler =
-    on "change" (Json.map handler Events.targetValue)
+    on "change" (Json.Decode.map handler Events.targetValue)
 
 
 selectColumn : List String -> (String -> a) -> String -> Html a

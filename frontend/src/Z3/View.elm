@@ -1,8 +1,7 @@
 module Z3.View exposing (view)
 
-import Html exposing (Html, br, div, input, option, select, text)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, div)
+import Html.Attributes exposing (class)
 import Util
 import ViewUtil
 import Z3.Model as Model

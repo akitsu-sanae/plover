@@ -5,12 +5,12 @@ import CVC4.Model
 import CVC4.Update
 import CVC4.View
 import Html exposing (Html, a, button, code, div, h1, header, label, li, pre, text, textarea, ul)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (class, for, href, rows)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Decode exposing (Decoder, field, string)
+import Json.Decode
 import Json.Encode
-import Util exposing (..)
+import Util
 import Z3.Model
 import Z3.Update
 import Z3.View
@@ -137,7 +137,7 @@ update msg model =
                             Cvc4Params <| CVC4.Update.update msg_ params
 
                         ( _, _ ) ->
-                            undefined ()
+                            Util.undefined ()
               }
             , Cmd.none
             )
@@ -146,7 +146,7 @@ update msg model =
             ( { model | input = src }, Cmd.none )
 
         Verify ->
-            ( { model | isLoading = True }, verificationCommand model )
+            ( { model | isLoading = True }, verifyCmd model )
 
         Output output ->
             ( { model
@@ -159,7 +159,7 @@ update msg model =
                                     { isSuccess = True, content = content }
 
                                 Err err ->
-                                    { isSuccess = False, content = toString err }
+                                    { isSuccess = False, content = Util.stringOfHttpError err }
                     in
                     { histories = new_history :: model.result.histories
                     , focused = 0
@@ -180,8 +180,8 @@ update msg model =
 -- HTTP
 
 
-verificationRequestBody : Model -> Http.Body
-verificationRequestBody model =
+requestBody : Model -> Http.Body
+requestBody model =
     Http.jsonBody <|
         Json.Encode.object
             [ ( "src", Json.Encode.string model.input )
@@ -196,18 +196,18 @@ verificationRequestBody model =
             ]
 
 
-verificationCommand : Model -> Cmd Msg
-verificationCommand model =
+verifyCmd : Model -> Cmd Msg
+verifyCmd model =
     Http.post
         { url = "https://aa4fhzgok5.execute-api.us-east-2.amazonaws.com/product/verify"
-        , body = verificationRequestBody model
+        , body = requestBody model
         , expect = Http.expectJson Output resultDecoder
         }
 
 
-resultDecoder : Decoder String
+resultDecoder : Json.Decode.Decoder String
 resultDecoder =
-    field "stdout" string
+    Json.Decode.field "stdout" Json.Decode.string
 
 
 

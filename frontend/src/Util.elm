@@ -1,8 +1,6 @@
-module Util exposing (id, nth, remove, toString, undefined, unwrap, zip)
+module Util exposing (id, nth, remove, stringOfHttpError, undefined, unwrap, zip)
 
 import Http
-import Json.Decode as Json
-import Json.Encode
 
 
 undefined : () -> a
@@ -10,8 +8,8 @@ undefined _ =
     Debug.todo "<undefined>"
 
 
-toString : Http.Error -> String
-toString err =
+stringOfHttpError : Http.Error -> String
+stringOfHttpError err =
     case err of
         Http.Timeout ->
             "Timeout"

@@ -92,7 +92,7 @@ pub struct Argments {
 }
 
 impl Argments {
-    pub fn to_commandline(mut self) -> Vec<String> {
+    pub fn to_commandline(self) -> Vec<String> {
         let mut result = vec![];
         result.push(format!(
             "--lang={}",
@@ -192,7 +192,14 @@ impl Argments {
             result.push(format!("--tlimit={}", n));
         }
 
-        result.append(&mut self.others);
+        let mut others: Vec<String> = self
+            .others
+            .into_iter()
+            .map(|opt| {
+                format!("\"{}\"", opt.replace("\"", "\\\"")) // escape double-quote
+            })
+            .collect();
+        result.append(&mut others);
 
         result
     }

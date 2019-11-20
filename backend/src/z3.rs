@@ -60,7 +60,7 @@ pub struct Argments {
 }
 
 impl Argments {
-    pub fn to_commandline(mut self) -> Vec<String> {
+    pub fn to_commandline(self) -> Vec<String> {
         let mut result = vec![];
         match self.format {
             Format::Smtlib2 => result.push("-smt2".to_string()),
@@ -104,7 +104,14 @@ impl Argments {
             result.push(format!("{}.{}={}", module_name, param_name, value));
         }
 
-        result.append(&mut self.others);
+        let mut others: Vec<String> = self
+            .others
+            .into_iter()
+            .map(|opt| {
+                format!("\"{}\"", opt.replace("\"", "\\\"")) // escape double-quote
+            })
+            .collect();
+        result.append(&mut others);
 
         result
     }
